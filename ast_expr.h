@@ -18,6 +18,7 @@
 
 class NamedType; // for new
 class Type; // for NewArray
+class CodeGenerator;
 
 class Expr : public Stmt
 {
@@ -41,6 +42,8 @@ class IntConstant : public Expr
 
   public:
     IntConstant(yyltype loc, int val);
+
+    Location* Emit(CodeGenerator *cg);
 };
 
 class DoubleConstant : public Expr
@@ -50,6 +53,8 @@ class DoubleConstant : public Expr
 
   public:
     DoubleConstant(yyltype loc, double val);
+
+    Location* Emit(CodeGenerator *cg);
 };
 
 class BoolConstant : public Expr
@@ -59,6 +64,8 @@ class BoolConstant : public Expr
 
   public:
     BoolConstant(yyltype loc, bool val);
+
+    Location* Emit(CodeGenerator *cg);
 };
 
 class StringConstant : public Expr
@@ -68,12 +75,16 @@ class StringConstant : public Expr
 
   public:
     StringConstant(yyltype loc, const char *val);
+
+    Location* Emit(CodeGenerator *cg);
 };
 
 class NullConstant: public Expr
 {
   public:
     NullConstant(yyltype loc) : Expr(loc) {}
+
+    Location* Emit(CodeGenerator *cg);
 };
 
 class Operator : public Node
