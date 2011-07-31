@@ -26,6 +26,8 @@ class CodeGenerator {
   private:
     List<Instruction*> *code;
 
+    int localOffset;
+
   public:
            // Here are some class constants to remind you of the offsets
            // used for globals, locals, and parameters. You will be
@@ -43,6 +45,8 @@ class CodeGenerator {
     static const int VarSize = 4;
 
     CodeGenerator();
+
+    void SetLocalOffset(int offset) { localOffset = offset; }
 
          // Assigns a new unique label name and returns it. Does not
          // generate any Tac instructions (see GenLabel below if needed)
