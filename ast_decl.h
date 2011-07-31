@@ -19,6 +19,7 @@ class Type;
 class NamedType;
 class Identifier;
 class Stmt;
+class CodeGenerator;
 
 class Decl : public Node
 {
@@ -28,6 +29,10 @@ class Decl : public Node
   public:
     Decl(Identifier *name);
     friend ostream& operator<<(ostream& out, Decl *d) { return out << d->id; }
+
+    const char* GetName() { return id->GetName(); }
+
+    virtual void Emit(CodeGenerator *cg) {} // TODO: Make pure virtual function
 };
 
 class VarDecl : public Decl
@@ -70,6 +75,8 @@ class FnDecl : public Decl
   public:
     FnDecl(Identifier *name, Type *returnType, List<VarDecl*> *formals);
     void SetFunctionBody(Stmt *b);
+
+    void Emit(CodeGenerator *cg);
 };
 
 #endif

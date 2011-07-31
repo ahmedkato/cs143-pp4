@@ -5,6 +5,7 @@
 #include "ast_decl.h"
 #include "ast_type.h"
 #include "ast_stmt.h"
+#include "codegen.h"
 
 Decl::Decl(Identifier *n) : Node(*n->GetLocation()) {
     Assert(n != NULL);
@@ -39,4 +40,10 @@ FnDecl::FnDecl(Identifier *n, Type *r, List<VarDecl*> *d) : Decl(n) {
 
 void FnDecl::SetFunctionBody(Stmt *b) {
     (body=b)->SetParent(this);
+}
+
+void FnDecl::Emit(CodeGenerator *cg) {
+    cg->GenLabel(GetName());
+
+    // TODO: Finish implementation
 }
