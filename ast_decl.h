@@ -20,6 +20,7 @@ class NamedType;
 class Identifier;
 class Stmt;
 class CodeGenerator;
+class Location;
 
 class Decl : public Node
 {
@@ -32,7 +33,8 @@ class Decl : public Node
 
     const char* GetName() { return id->GetName(); }
 
-    virtual void Emit(CodeGenerator *cg) {} // TODO: Make pure virtual function
+    // TODO: Make into a pure virtual function
+    virtual Location* Emit(CodeGenerator *cg) { return NULL; }
 };
 
 class VarDecl : public Decl
@@ -76,7 +78,7 @@ class FnDecl : public Decl
     FnDecl(Identifier *name, Type *returnType, List<VarDecl*> *formals);
     void SetFunctionBody(Stmt *b);
 
-    void Emit(CodeGenerator *cg);
+    Location* Emit(CodeGenerator *cg);
 };
 
 #endif
