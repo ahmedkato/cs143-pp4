@@ -41,9 +41,11 @@ StmtBlock::StmtBlock(List<VarDecl*> *d, List<Stmt*> *s) {
     (stmts=s)->SetParentAll(this);
 }
 
-void StmtBlock::Emit(CodeGenerator *cg) {
+Location* StmtBlock::Emit(CodeGenerator *cg) {
     for (int i = 0, n = stmts->NumElements(); i < n; ++i)
         stmts->Nth(i)->Emit(cg);
+
+    return NULL;
 }
 
 ConditionalStmt::ConditionalStmt(Expr *t, Stmt *b) {

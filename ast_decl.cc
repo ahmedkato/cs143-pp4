@@ -42,8 +42,10 @@ void FnDecl::SetFunctionBody(Stmt *b) {
     (body=b)->SetParent(this);
 }
 
-void FnDecl::Emit(CodeGenerator *cg) {
+Location* FnDecl::Emit(CodeGenerator *cg) {
     cg->GenLabel(GetName());
 
     if (body) body->Emit(cg);
+
+    return NULL;
 }

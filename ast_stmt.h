@@ -19,6 +19,7 @@ class Decl;
 class VarDecl;
 class Expr;
 class CodeGenerator;
+class Location;
 
 class Program : public Node
 {
@@ -38,7 +39,8 @@ class Stmt : public Node
     Stmt() : Node() {}
     Stmt(yyltype loc) : Node(loc) {}
 
-    virtual void Emit(CodeGenerator *cg) {} // TODO: Make pure virtual function
+    // TODO: Make into a pure virtual function
+    virtual Location* Emit(CodeGenerator *cg) { return NULL; }
 };
 
 class StmtBlock : public Stmt
@@ -50,7 +52,7 @@ class StmtBlock : public Stmt
   public:
     StmtBlock(List<VarDecl*> *variableDeclarations, List<Stmt*> *statements);
 
-    void Emit(CodeGenerator *cg);
+    Location* Emit(CodeGenerator *cg);
 };
 
 class ConditionalStmt : public Stmt
