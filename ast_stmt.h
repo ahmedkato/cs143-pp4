@@ -18,11 +18,13 @@
 class Decl;
 class VarDecl;
 class Expr;
+class CodeGenerator;
 
 class Program : public Node
 {
   protected:
      List<Decl*> *decls;
+     CodeGenerator *codeGenerator;
 
   public:
      Program(List<Decl*> *declList);
