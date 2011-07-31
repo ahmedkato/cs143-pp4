@@ -37,6 +37,8 @@ class Stmt : public Node
   public:
     Stmt() : Node() {}
     Stmt(yyltype loc) : Node(loc) {}
+
+    virtual void Emit(CodeGenerator *cg) {} // TODO: Make pure virtual function
 };
 
 class StmtBlock : public Stmt
@@ -47,6 +49,8 @@ class StmtBlock : public Stmt
 
   public:
     StmtBlock(List<VarDecl*> *variableDeclarations, List<Stmt*> *statements);
+
+    void Emit(CodeGenerator *cg);
 };
 
 class ConditionalStmt : public Stmt
