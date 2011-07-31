@@ -45,5 +45,5 @@ void FnDecl::SetFunctionBody(Stmt *b) {
 void FnDecl::Emit(CodeGenerator *cg) {
     cg->GenLabel(GetName());
 
-    // TODO: Finish implementation
+    if (body) body->Emit(cg);
 }
