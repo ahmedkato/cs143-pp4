@@ -9,7 +9,7 @@
 #include <string.h>
 #include "tac.h"
 #include "mips.h"
-  
+
 CodeGenerator::CodeGenerator()
 {
   code = new List<Instruction*>();
@@ -22,7 +22,6 @@ char *CodeGenerator::NewLabel()
   sprintf(temp, "_L%d", nextLabelNum++);
   return strdup(temp);
 }
-
 
 Location *CodeGenerator::GenTempVar()
 {
@@ -38,7 +37,6 @@ Location *CodeGenerator::GenTempVar()
   return result;
 }
 
- 
 Location *CodeGenerator::GenLoadConstant(int value)
 {
   Location *result = GenTempVar();
@@ -51,21 +49,19 @@ Location *CodeGenerator::GenLoadConstant(const char *s)
   Location *result = GenTempVar();
   code->Append(new LoadStringConstant(result, s));
   return result;
-} 
+}
 
 Location *CodeGenerator::GenLoadLabel(const char *label)
 {
   Location *result = GenTempVar();
   code->Append(new LoadLabel(result, label));
   return result;
-} 
-
+}
 
 void CodeGenerator::GenAssign(Location *dst, Location *src)
 {
   code->Append(new Assign(dst, src));
 }
-
 
 Location *CodeGenerator::GenLoad(Location *ref, int offset)
 {
@@ -79,7 +75,6 @@ void CodeGenerator::GenStore(Location *dst,Location *src, int offset)
   code->Append(new Store(dst, src, offset));
 }
 
-
 Location *CodeGenerator::GenBinaryOp(const char *opName, Location *op1,
 						     Location *op2)
 {
@@ -87,7 +82,6 @@ Location *CodeGenerator::GenBinaryOp(const char *opName, Location *op1,
   code->Append(new BinaryOp(BinaryOp::OpCodeForName(opName), result, op1, op2));
   return result;
 }
-
 
 void CodeGenerator::GenLabel(const char *label)
 {
@@ -108,7 +102,6 @@ void CodeGenerator::GenReturn(Location *val)
 {
   code->Append(new Return(val));
 }
-
 
 BeginFunc *CodeGenerator::GenBeginFunc()
 {
@@ -147,8 +140,7 @@ Location *CodeGenerator::GenACall(Location *fnAddr, bool fnHasReturnValue)
   code->Append(new ACall(fnAddr, result));
   return result;
 }
- 
- 
+
 static struct _builtin {
   const char *label;
   int numArgs;
@@ -181,12 +173,10 @@ Location *CodeGenerator::GenBuiltInCall(BuiltIn bn,Location *arg1, Location *arg
   return result;
 }
 
-
 void CodeGenerator::GenVTable(const char *className, List<const char *> *methodLabels)
 {
   code->Append(new VTable(className, methodLabels));
 }
-
 
 void CodeGenerator::DoFinalCodeGen()
 {
@@ -200,5 +190,3 @@ void CodeGenerator::DoFinalCodeGen()
 	 code->Nth(i)->Emit(&mips);
   }
 }
-
-

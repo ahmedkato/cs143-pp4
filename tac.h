@@ -32,8 +32,8 @@ class Mips;
     // and has an offset relative to the base of that segment.
     // For example, a declaration for integer num as the first local
     // variable in a function would be assigned a Location object
-    // with name "num", segment fpRelative, and offset -8. 
- 
+    // with name "num", segment fpRelative, and offset -8.
+
 typedef enum {fpRelative, gpRelative} Segment;
 
 class Location
@@ -42,7 +42,7 @@ class Location
     const char *variableName;
     Segment segment;
     int offset;
-	  
+
   public:
     Location(Segment seg, int offset, const char *name);
 
@@ -50,16 +50,16 @@ class Location
     Segment GetSegment()            { return segment; }
     int GetOffset()                 { return offset; }
 };
- 
+
 
 
   // base class from which all Tac instructions derived
   // has the interface for the 2 polymorphic messages: Print & Emit
-  
+
 class Instruction {
     protected:
         char printed[128];
-	  
+
     public:
         virtual ~Instruction() {}
 	virtual void Print();
@@ -67,11 +67,11 @@ class Instruction {
 	virtual void Emit(Mips *mips);
 };
 
-  
-  
+
+
   // for convenience, the instruction classes are listed here.
   // the interfaces for the classes follows below
-  
+
   class LoadConstant;
   class LoadStringConstant;
   class LoadLabel;
@@ -109,7 +109,7 @@ class LoadStringConstant: public Instruction {
     LoadStringConstant(Location *dst, const char *s);
     void EmitSpecific(Mips *mips);
 };
-    
+
 class LoadLabel: public Instruction {
     Location *dst;
     const char *label;
@@ -147,7 +147,7 @@ class BinaryOp: public Instruction {
     typedef enum {Add, Sub, Mul, Div, Mod, Eq, Less, And, Or, NumOps} OpCode;
     static const char * const opName[NumOps];
     static OpCode OpCodeForName(const char *name);
-    
+
   protected:
     OpCode code;
     Location *dst, *op1, *op2;
@@ -199,21 +199,21 @@ class Return: public Instruction {
   public:
     Return(Location *val);
     void EmitSpecific(Mips *mips);
-};   
+};
 
 class PushParam: public Instruction {
     Location *param;
   public:
     PushParam(Location *param);
     void EmitSpecific(Mips *mips);
-}; 
+};
 
 class PopParams: public Instruction {
     int numBytes;
   public:
     PopParams(int numBytesOfParamsToRemove);
     void EmitSpecific(Mips *mips);
-}; 
+};
 
 class LCall: public Instruction {
     const char *label;
