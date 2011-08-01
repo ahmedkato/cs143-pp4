@@ -9,6 +9,19 @@
 #include "ast_expr.h"
 #include "codegen.h"
 
+Scope *Program::gScope = new Scope;
+
+Scope::Scope() : table(new Hashtable<Decl*>) {
+    // Empty
+}
+
+/* XXX: Only semantically valid programs will be tested, thus no semantic
+ * checking is performed here.
+ */
+void Scope::AddDecl(Decl *d) {
+    table->Enter(d->GetName(), d);
+}
+
 Program::Program(List<Decl*> *d) : codeGenerator(new CodeGenerator) {
     Assert(d != NULL);
     (decls=d)->SetParentAll(this);
@@ -18,6 +31,15 @@ void Program::Check() {
     /* You can use your pp3 semantic analysis or leave it out if
      * you want to avoid the clutter.  We won't test pp4 against
      * semantically-invalid programs.
+     */
+    for (int i = 0, n = decls->NumElements(); i < n; ++i)
+        gScope->AddDecl(decls->Nth(i));
+
+    for (int i = 0, n = decls->NumElements(); i < n; ++i)
+        decls->Nth(i)->BuildScope();
+
+    /* XXX: Only semantically valid programs will be tested, thus no
+     * semantic checking is performed here.
      */
 }
 

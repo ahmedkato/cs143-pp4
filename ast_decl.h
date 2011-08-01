@@ -21,11 +21,13 @@ class Identifier;
 class Stmt;
 class CodeGenerator;
 class Location;
+class Scope;
 
 class Decl : public Node
 {
   protected:
     Identifier *id;
+    Scope *scope;
 
   public:
     Decl(Identifier *name);
@@ -33,7 +35,8 @@ class Decl : public Node
 
     const char* GetName() { return id->GetName(); }
 
-    // TODO: Make into a pure virtual function
+    // TODO: Make into pure virtual functions
+    virtual void BuildScope() {}
     virtual Location* Emit(CodeGenerator *cg) { return NULL; }
 };
 
@@ -78,6 +81,7 @@ class FnDecl : public Decl
     FnDecl(Identifier *name, Type *returnType, List<VarDecl*> *formals);
     void SetFunctionBody(Stmt *b);
 
+    void BuildScope();
     Location* Emit(CodeGenerator *cg);
 };
 
