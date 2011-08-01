@@ -35,8 +35,9 @@ class Decl : public Node
 
     const char* GetName() { return id->GetName(); }
 
-    // TODO: Make into pure virtual functions
-    virtual void BuildScope() {}
+    virtual void BuildScope() = 0;
+
+    // TODO: Make into a pure virtual function
     virtual Location* Emit(CodeGenerator *cg) { return NULL; }
 };
 
@@ -47,6 +48,8 @@ class VarDecl : public Decl
 
   public:
     VarDecl(Identifier *name, Type *type);
+
+    void BuildScope() { /* Empty */ }
 };
 
 class ClassDecl : public Decl
@@ -59,6 +62,8 @@ class ClassDecl : public Decl
   public:
     ClassDecl(Identifier *name, NamedType *extends,
               List<NamedType*> *implements, List<Decl*> *members);
+
+    void BuildScope();
 };
 
 class InterfaceDecl : public Decl
@@ -68,6 +73,8 @@ class InterfaceDecl : public Decl
 
   public:
     InterfaceDecl(Identifier *name, List<Decl*> *members);
+
+    void BuildScope();
 };
 
 class FnDecl : public Decl

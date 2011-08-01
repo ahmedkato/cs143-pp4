@@ -26,9 +26,25 @@ ClassDecl::ClassDecl(Identifier *n, NamedType *ex, List<NamedType*> *imp, List<D
     (members=m)->SetParentAll(this);
 }
 
+void ClassDecl::BuildScope() {
+    for (int i = 0, n = members->NumElements(); i < n; ++i)
+        scope->AddDecl(members->Nth(i));
+
+    for (int i = 0, n = members->NumElements(); i < n; ++i)
+        members->Nth(i)->BuildScope();
+}
+
 InterfaceDecl::InterfaceDecl(Identifier *n, List<Decl*> *m) : Decl(n) {
     Assert(n != NULL && m != NULL);
     (members=m)->SetParentAll(this);
+}
+
+void InterfaceDecl::BuildScope() {
+    for (int i = 0, n = members->NumElements(); i < n; ++i)
+        scope->AddDecl(members->Nth(i));
+
+    for (int i = 0, n = members->NumElements(); i < n; ++i)
+        members->Nth(i)->BuildScope();
 }
 
 FnDecl::FnDecl(Identifier *n, Type *r, List<VarDecl*> *d) : Decl(n) {
