@@ -62,8 +62,9 @@ class Stmt : public Node
 
     Scope* GetScope() { return scope; }
 
-    // TODO: Make into pure virtual functions
-    virtual void BuildScope() {}
+    virtual void BuildScope() = 0;
+
+    // TODO: Make into a pure virtual function
     virtual Location* Emit(CodeGenerator *cg) { return NULL; }
 };
 
@@ -76,6 +77,7 @@ class StmtBlock : public Stmt
   public:
     StmtBlock(List<VarDecl*> *variableDeclarations, List<Stmt*> *statements);
 
+    void BuildScope();
     Location* Emit(CodeGenerator *cg);
 };
 
@@ -87,6 +89,8 @@ class ConditionalStmt : public Stmt
 
   public:
     ConditionalStmt(Expr *testExpr, Stmt *body);
+
+    void BuildScope() = 0;
 };
 
 class LoopStmt : public ConditionalStmt
@@ -94,6 +98,8 @@ class LoopStmt : public ConditionalStmt
   public:
     LoopStmt(Expr *testExpr, Stmt *body)
             : ConditionalStmt(testExpr, body) {}
+
+    void BuildScope() = 0;
 };
 
 class ForStmt : public LoopStmt
@@ -103,12 +109,16 @@ class ForStmt : public LoopStmt
 
   public:
     ForStmt(Expr *init, Expr *test, Expr *step, Stmt *body);
+
+    void BuildScope();
 };
 
 class WhileStmt : public LoopStmt
 {
   public:
     WhileStmt(Expr *test, Stmt *body) : LoopStmt(test, body) {}
+
+    void BuildScope();
 };
 
 class IfStmt : public ConditionalStmt
@@ -118,12 +128,16 @@ class IfStmt : public ConditionalStmt
 
   public:
     IfStmt(Expr *test, Stmt *thenBody, Stmt *elseBody);
+
+    void BuildScope();
 };
 
 class BreakStmt : public Stmt
 {
   public:
     BreakStmt(yyltype loc) : Stmt(loc) {}
+
+    void BuildScope() { /* Empty */ }
 };
 
 class ReturnStmt : public Stmt
@@ -133,6 +147,8 @@ class ReturnStmt : public Stmt
 
   public:
     ReturnStmt(yyltype loc, Expr *expr);
+
+    void BuildScope();
 };
 
 class PrintStmt : public Stmt
@@ -142,6 +158,8 @@ class PrintStmt : public Stmt
 
   public:
     PrintStmt(List<Expr*> *arguments);
+
+    void BuildScope();
 };
 
 #endif
