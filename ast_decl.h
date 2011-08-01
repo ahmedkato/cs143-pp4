@@ -21,13 +21,11 @@ class Identifier;
 class Stmt;
 class CodeGenerator;
 class Location;
-class Scope;
 
 class Decl : public Node
 {
   protected:
     Identifier *id;
-    Scope *scope;
 
   public:
     Decl(Identifier *name);

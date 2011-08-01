@@ -53,14 +53,9 @@ class Program : public Node
 
 class Stmt : public Node
 {
-  protected:
-    Scope *scope;
-
   public:
-    Stmt() : Node() {}
-    Stmt(yyltype loc) : Node(loc) {}
-
-    Scope* GetScope() { return scope; }
+    Stmt();
+    Stmt(yyltype loc);
 
     virtual void BuildScope() = 0;
 

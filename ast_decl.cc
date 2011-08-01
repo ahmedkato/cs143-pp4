@@ -7,9 +7,10 @@
 #include "ast_stmt.h"
 #include "codegen.h"
 
-Decl::Decl(Identifier *n) : Node(*n->GetLocation()), scope(new Scope) {
+Decl::Decl(Identifier *n) : Node(*n->GetLocation()) {
     Assert(n != NULL);
     (id=n)->SetParent(this);
+    scope = new Scope;
 }
 
 VarDecl::VarDecl(Identifier *n, Type *t) : Decl(n) {
