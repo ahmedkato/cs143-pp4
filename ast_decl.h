@@ -14,6 +14,7 @@
 
 #include "ast.h"
 #include "list.h"
+#include "errno.h"
 
 class Type;
 class NamedType;
@@ -37,17 +38,24 @@ class Decl : public Node
 
     // TODO: Make into a pure virtual function
     virtual Location* Emit(CodeGenerator *cg) { return NULL; }
+
+    virtual Location* GetMemLoc() { return NULL; }
+    virtual int SetMemLoc(Location *m) { return -ENOTSUP; }
 };
 
 class VarDecl : public Decl
 {
   protected:
     Type *type;
+    Location *memLoc;
 
   public:
     VarDecl(Identifier *name, Type *type);
 
     void BuildScope() { /* Empty */ }
+
+    Location* GetMemLoc() { return memLoc; }
+    int SetMemLoc(Location *m) { memLoc = m; return 0; }
 };
 
 class ClassDecl : public Decl

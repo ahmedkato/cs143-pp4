@@ -22,6 +22,7 @@
 #ifndef _H_tac
 #define _H_tac
 
+#include <iostream>
 #include "list.h" // for VTable
 class Mips;
 
@@ -49,6 +50,8 @@ class Location
     const char *GetName()           { return variableName; }
     Segment GetSegment()            { return segment; }
     int GetOffset()                 { return offset; }
+
+    friend ostream& operator<<(ostream& out, Location *loc);
 };
 
 

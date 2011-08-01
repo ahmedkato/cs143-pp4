@@ -10,6 +10,19 @@
 Location::Location(Segment s, int o, const char *name) :
   variableName(strdup(name)), segment(s), offset(o){}
 
+ostream& operator<<(ostream& out, Location *loc) {
+    out << loc->variableName << " ";
+
+    if (loc->segment == fpRelative)
+        out << "fpRelative";
+    else if (loc->segment == gpRelative)
+        out << "gpRelative";
+
+    if (loc->offset >= 0)
+        out << "+";
+
+    return out << loc->offset;
+}
 
 void Instruction::Print() {
   printf("\t%s ;\n", printed);
