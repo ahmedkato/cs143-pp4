@@ -7,7 +7,7 @@
 #include "ast_stmt.h"
 #include "codegen.h"
 
-Decl::Decl(Identifier *n) : Node(*n->GetLocation()) {
+Decl::Decl(Identifier *n) : Node(*n->GetLocation()), scope(new Scope) {
     Assert(n != NULL);
     (id=n)->SetParent(this);
 }
@@ -40,6 +40,16 @@ FnDecl::FnDecl(Identifier *n, Type *r, List<VarDecl*> *d) : Decl(n) {
 
 void FnDecl::SetFunctionBody(Stmt *b) {
     (body=b)->SetParent(this);
+}
+
+void FnDecl::BuildScope() {
+    for (int i = 0, n = formals->NumElements(); i < n; ++i)
+        scope->AddDecl(formals->Nth(i));
+
+    for (int i = 0, n = formals->NumElements(); i < n; ++i)
+        formals->Nth(i)->BuildScope();
+
+    if (body) body->BuildScope();
 }
 
 Location* FnDecl::Emit(CodeGenerator *cg) {

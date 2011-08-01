@@ -14,6 +14,7 @@
 
 #include "list.h"
 #include "ast.h"
+#include "hashtable.h"
 
 class Decl;
 class VarDecl;
@@ -21,8 +22,22 @@ class Expr;
 class CodeGenerator;
 class Location;
 
+class Scope
+{
+  public:
+    Hashtable<Decl*> *table;
+
+  public:
+    Scope();
+
+    void AddDecl(Decl *d);
+};
+
 class Program : public Node
 {
+  public:
+    static Scope *gScope;
+
   protected:
      List<Decl*> *decls;
      CodeGenerator *codeGenerator;
@@ -31,15 +46,24 @@ class Program : public Node
      Program(List<Decl*> *declList);
      void Check();
      void Emit();
+
+  private:
+    void BuildScope();
 };
 
 class Stmt : public Node
 {
+  protected:
+    Scope *scope;
+
   public:
     Stmt() : Node() {}
     Stmt(yyltype loc) : Node(loc) {}
 
-    // TODO: Make into a pure virtual function
+    Scope* GetScope() { return scope; }
+
+    // TODO: Make into pure virtual functions
+    virtual void BuildScope() {}
     virtual Location* Emit(CodeGenerator *cg) { return NULL; }
 };
 
