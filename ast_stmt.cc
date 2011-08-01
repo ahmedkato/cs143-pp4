@@ -8,6 +8,7 @@
 #include "ast_decl.h"
 #include "ast_expr.h"
 #include "codegen.h"
+#include "hashtable.h"
 
 Scope *Program::gScope = new Scope;
 
@@ -52,6 +53,15 @@ void Program::Emit() {
      *      which makes for a great use of inheritance and
      *      polymorphism in the node classes.
      */
+    int offset = CodeGenerator::OffsetToFirstGlobal;
+
+    for (int i = 0, n = decls->NumElements(); i < n; ++i) {
+        Decl *d = decls->Nth(i);
+        Location *loc = new Location(gpRelative, offset, d->GetName());
+        if (d->SetMemLoc(loc) == 0)
+            offset += CodeGenerator::VarSize;
+    }
+
     for (int i = 0, n = decls->NumElements(); i < n; ++i)
         decls->Nth(i)->Emit(codeGenerator);
 
@@ -84,6 +94,17 @@ void StmtBlock::BuildScope() {
 }
 
 Location* StmtBlock::Emit(CodeGenerator *cg) {
+    int offset = CodeGenerator::OffsetToFirstLocal;
+
+    for (int i = 0, n = decls->NumElements(); i < n; ++i) {
+        Decl *d = decls->Nth(i);
+        Location *loc = new Location(fpRelative, offset, d->GetName());
+        if (d->SetMemLoc(loc) == 0)
+            offset -= CodeGenerator::VarSize;
+    }
+
+    cg->SetLocalOffset(offset);
+
     for (int i = 0, n = stmts->NumElements(); i < n; ++i)
         stmts->Nth(i)->Emit(cg);
 
