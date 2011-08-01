@@ -11,11 +11,13 @@
 Node::Node(yyltype loc) {
     location = new yyltype(loc);
     parent = NULL;
+    scope = NULL;
 }
 
 Node::Node() {
     location = NULL;
     parent = NULL;
+    scope = NULL;
 }
 	 
 Identifier::Identifier(yyltype loc, const char *n) : Node(loc) {

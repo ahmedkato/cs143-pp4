@@ -34,16 +34,20 @@
 #include <iostream>
 using namespace std;
 
+class Scope;
+
 class Node  {
   protected:
     yyltype *location;
     Node *parent;
+    Scope *scope;
 
   public:
     Node(yyltype loc);
     Node();
     virtual ~Node() {}
 
+    Scope *GetScope()        { return scope; }
     yyltype *GetLocation()   { return location; }
     void SetParent(Node *p)  { parent = p; }
     Node *GetParent()        { return parent; }

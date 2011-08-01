@@ -25,6 +25,7 @@ void Scope::AddDecl(Decl *d) {
 Program::Program(List<Decl*> *d) : codeGenerator(new CodeGenerator) {
     Assert(d != NULL);
     (decls=d)->SetParentAll(this);
+    scope = gScope;
 }
 
 void Program::Check() {
@@ -55,6 +56,14 @@ void Program::Emit() {
         decls->Nth(i)->Emit(codeGenerator);
 
     codeGenerator->DoFinalCodeGen();
+}
+
+Stmt::Stmt() : Node() {
+    scope = new Scope;
+}
+
+Stmt::Stmt(yyltype loc) : Node(loc) {
+    scope = new Scope;
 }
 
 StmtBlock::StmtBlock(List<VarDecl*> *d, List<Stmt*> *s) {
