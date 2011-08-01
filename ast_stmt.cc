@@ -63,6 +63,17 @@ StmtBlock::StmtBlock(List<VarDecl*> *d, List<Stmt*> *s) {
     (stmts=s)->SetParentAll(this);
 }
 
+void StmtBlock::BuildScope() {
+    for (int i = 0, n = decls->NumElements(); i < n; ++i)
+        scope->AddDecl(decls->Nth(i));
+
+    for (int i = 0, n = decls->NumElements(); i < n; ++i)
+        decls->Nth(i)->BuildScope();
+
+    for (int i = 0, n = stmts->NumElements(); i < n; ++i)
+        stmts->Nth(i)->BuildScope();
+}
+
 Location* StmtBlock::Emit(CodeGenerator *cg) {
     for (int i = 0, n = stmts->NumElements(); i < n; ++i)
         stmts->Nth(i)->Emit(cg);
@@ -76,10 +87,30 @@ ConditionalStmt::ConditionalStmt(Expr *t, Stmt *b) {
     (body=b)->SetParent(this);
 }
 
+void ConditionalStmt::BuildScope() {
+    test->BuildScope();
+    body->BuildScope();
+}
+
+void LoopStmt::BuildScope() {
+    ConditionalStmt::BuildScope();
+}
+
 ForStmt::ForStmt(Expr *i, Expr *t, Expr *s, Stmt *b): LoopStmt(t, b) {
     Assert(i != NULL && t != NULL && s != NULL && b != NULL);
     (init=i)->SetParent(this);
     (step=s)->SetParent(this);
+}
+
+void ForStmt::BuildScope() {
+    LoopStmt::BuildScope();
+
+    init->BuildScope();
+    step->BuildScope();
+}
+
+void WhileStmt::BuildScope() {
+    LoopStmt::BuildScope();
 }
 
 IfStmt::IfStmt(Expr *t, Stmt *tb, Stmt *eb): ConditionalStmt(t, tb) {
@@ -88,12 +119,27 @@ IfStmt::IfStmt(Expr *t, Stmt *tb, Stmt *eb): ConditionalStmt(t, tb) {
     if (elseBody) elseBody->SetParent(this);
 }
 
+void IfStmt::BuildScope() {
+    ConditionalStmt::BuildScope();
+
+    if (elseBody) elseBody->BuildScope();
+}
+
 ReturnStmt::ReturnStmt(yyltype loc, Expr *e) : Stmt(loc) {
     Assert(e != NULL);
     (expr=e)->SetParent(this);
 }
 
+void ReturnStmt::BuildScope() {
+    expr->BuildScope();
+}
+
 PrintStmt::PrintStmt(List<Expr*> *a) {
     Assert(a != NULL);
     (args=a)->SetParentAll(this);
+}
+
+void PrintStmt::BuildScope() {
+    for (int i = 0, n = args->NumElements(); i < n; ++i)
+        args->Nth(i)->BuildScope();
 }

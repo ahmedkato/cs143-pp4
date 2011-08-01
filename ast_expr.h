@@ -25,6 +25,8 @@ class Expr : public Stmt
   public:
     Expr(yyltype loc) : Stmt(loc) {}
     Expr() : Stmt() {}
+
+    void BuildScope() { /* Empty */ }
 };
 
 /* This node type is used for those places where an expression is optional.
