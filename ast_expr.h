@@ -97,6 +97,8 @@ class Operator : public Node
   public:
     Operator(yyltype loc, const char *tok);
     friend ostream& operator<<(ostream& out, Operator *o) { return out << o->tokenString; }
+
+    const char *GetTokenString() { return tokenString; }
 };
 
 class CompoundExpr : public Expr
@@ -108,6 +110,8 @@ class CompoundExpr : public Expr
   public:
     CompoundExpr(Expr *lhs, Operator *op, Expr *rhs); // for binary
     CompoundExpr(Operator *op, Expr *rhs);             // for unary
+
+    virtual Location* Emit(CodeGenerator *cg) = 0;
 };
 
 class ArithmeticExpr : public CompoundExpr
@@ -115,12 +119,16 @@ class ArithmeticExpr : public CompoundExpr
   public:
     ArithmeticExpr(Expr *lhs, Operator *op, Expr *rhs) : CompoundExpr(lhs,op,rhs) {}
     ArithmeticExpr(Operator *op, Expr *rhs) : CompoundExpr(op,rhs) {}
+
+    Location* Emit(CodeGenerator *cg);
 };
 
 class RelationalExpr : public CompoundExpr
 {
   public:
     RelationalExpr(Expr *lhs, Operator *op, Expr *rhs) : CompoundExpr(lhs,op,rhs) {}
+
+    Location* Emit(CodeGenerator *cg);
 };
 
 class EqualityExpr : public CompoundExpr
@@ -128,6 +136,8 @@ class EqualityExpr : public CompoundExpr
   public:
     EqualityExpr(Expr *lhs, Operator *op, Expr *rhs) : CompoundExpr(lhs,op,rhs) {}
     const char *GetPrintNameForNode() { return "EqualityExpr"; }
+
+    Location* Emit(CodeGenerator *cg);
 };
 
 class LogicalExpr : public CompoundExpr
@@ -136,6 +146,8 @@ class LogicalExpr : public CompoundExpr
     LogicalExpr(Expr *lhs, Operator *op, Expr *rhs) : CompoundExpr(lhs,op,rhs) {}
     LogicalExpr(Operator *op, Expr *rhs) : CompoundExpr(op,rhs) {}
     const char *GetPrintNameForNode() { return "LogicalExpr"; }
+
+    Location* Emit(CodeGenerator *cg);
 };
 
 class AssignExpr : public CompoundExpr
@@ -143,6 +155,8 @@ class AssignExpr : public CompoundExpr
   public:
     AssignExpr(Expr *lhs, Operator *op, Expr *rhs) : CompoundExpr(lhs,op,rhs) {}
     const char *GetPrintNameForNode() { return "AssignExpr"; }
+
+    Location* Emit(CodeGenerator *cg);
 };
 
 class LValue : public Expr

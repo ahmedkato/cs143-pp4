@@ -76,6 +76,37 @@ CompoundExpr::CompoundExpr(Operator *o, Expr *r)
     (right=r)->SetParent(this);
 }
 
+Location* CompoundExpr::Emit(CodeGenerator *cg) {
+    Location *ltemp = left->Emit(cg);
+    Location *rtemp = right->Emit(cg);
+
+    // TODO: Simulate the unsupported operators
+    return cg->GenBinaryOp(op->GetTokenString(), ltemp, rtemp);
+}
+
+Location* ArithmeticExpr::Emit(CodeGenerator *cg) {
+    return CompoundExpr::Emit(cg);
+}
+
+Location* RelationalExpr::Emit(CodeGenerator *cg) {
+    return CompoundExpr::Emit(cg);
+}
+
+Location* EqualityExpr::Emit(CodeGenerator *cg) {
+    return CompoundExpr::Emit(cg);
+}
+
+Location* LogicalExpr::Emit(CodeGenerator *cg) {
+    return CompoundExpr::Emit(cg);
+}
+
+Location* AssignExpr::Emit(CodeGenerator *cg) {
+    Location *ltemp = left->Emit(cg);
+    Location *rtemp = right->Emit(cg);
+    cg->GenAssign(ltemp, rtemp);
+    return NULL;
+}
+
 ArrayAccess::ArrayAccess(yyltype loc, Expr *b, Expr *s) : LValue(loc) {
     (base=b)->SetParent(this);
     (subscript=s)->SetParent(this);
