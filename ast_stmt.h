@@ -31,6 +31,7 @@ class Scope
     Scope();
 
     void AddDecl(Decl *d);
+    friend ostream& operator<<(ostream& out, Scope *s);
 };
 
 class Program : public Node

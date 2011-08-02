@@ -23,6 +23,15 @@ void Scope::AddDecl(Decl *d) {
     table->Enter(d->GetName(), d);
 }
 
+ostream& operator<<(ostream& out, Scope *s) {
+    out << "========== Scope ==========" << std::endl;
+    Iterator<Decl*> iter = s->table->GetIterator();
+    Decl *d;
+    while ((d = iter.GetNextValue()) != NULL)
+        out << d << std::endl;
+    return out;
+}
+
 Program::Program(List<Decl*> *d) : codeGenerator(new CodeGenerator) {
     Assert(d != NULL);
     (decls=d)->SetParentAll(this);
