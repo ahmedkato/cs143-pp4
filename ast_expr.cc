@@ -9,6 +9,16 @@
 #include "ast_decl.h"
 #include "codegen.h"
 
+Decl* Expr::GetFieldDecl(Identifier *field, Node *n) {
+    while (n != NULL) {
+        Decl *d = n->GetScope()->table->Lookup(field->GetName());
+        if (d != NULL)
+            return d;
+        n = n->GetParent();
+    }
+    return NULL;
+}
+
 ClassDecl* Expr::GetClassDecl() {
     Node *n = this;
     while (n != NULL) {
@@ -163,18 +173,12 @@ VarDecl* FieldAccess::GetDecl() {
 
     ClassDecl *classDecl = GetClassDecl();
 
-    if (classDecl == NULL) {
-        Node *n = this;
-        while (n != NULL) {
-            Decl *d = n->GetScope()->table->Lookup(field->GetName());
-            if (d != NULL)
-                return dynamic_cast<VarDecl*>(d);
-            n = n->GetParent();
-        }
-        return NULL;
-    }
+    Decl *d;
+    if (classDecl == NULL)
+        d = GetFieldDecl(field, this);
+    else
+        d = GetFieldDecl(field, classDecl);
 
-    Decl *d = classDecl->GetScope()->table->Lookup(field->GetName());
     return dynamic_cast<VarDecl*>(d);
 
 }

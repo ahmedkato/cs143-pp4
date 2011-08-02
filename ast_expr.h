@@ -32,6 +32,7 @@ class Expr : public Stmt
     void BuildScope() { /* Empty */ }
 
   protected:
+    Decl* GetFieldDecl(Identifier *field, Node *n);
     ClassDecl* GetClassDecl();
 };
 
