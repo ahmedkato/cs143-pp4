@@ -9,6 +9,16 @@
 #include "ast_decl.h"
 #include "codegen.h"
 
+ClassDecl* Expr::GetClassDecl() {
+    Node *n = this;
+    while (n != NULL) {
+        if (dynamic_cast<ClassDecl*>(n))
+            return static_cast<ClassDecl*>(n);
+        n = n->GetParent();
+    }
+    return NULL;
+}
+
 IntConstant::IntConstant(yyltype loc, int val) : Expr(loc) {
     value = val;
 }
@@ -118,6 +128,35 @@ FieldAccess::FieldAccess(Expr *b, Identifier *f)
     base = b;
     if (base) base->SetParent(this);
     (field=f)->SetParent(this);
+}
+
+Location* FieldAccess::Emit(CodeGenerator *cg) {
+    VarDecl *d = GetDecl();
+    if (d == NULL)
+        return NULL;
+
+    return d->GetMemLoc();
+}
+
+VarDecl* FieldAccess::GetDecl() {
+    if (base != NULL) return NULL; // TODO: Support cases when base != NULL
+
+    ClassDecl *classDecl = GetClassDecl();
+
+    if (classDecl == NULL) {
+        Node *n = this;
+        while (n != NULL) {
+            Decl *d = n->GetScope()->table->Lookup(field->GetName());
+            if (d != NULL)
+                return dynamic_cast<VarDecl*>(d);
+            n = n->GetParent();
+        }
+        return NULL;
+    }
+
+    Decl *d = classDecl->GetScope()->table->Lookup(field->GetName());
+    return dynamic_cast<VarDecl*>(d);
+
 }
 
 Call::Call(yyltype loc, Expr *b, Identifier *f, List<Expr*> *a) : Expr(loc)  {

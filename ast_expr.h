@@ -19,6 +19,7 @@
 class NamedType; // for new
 class Type; // for NewArray
 class CodeGenerator;
+class ClassDecl;
 
 class Expr : public Stmt
 {
@@ -27,6 +28,9 @@ class Expr : public Stmt
     Expr() : Stmt() {}
 
     void BuildScope() { /* Empty */ }
+
+  protected:
+    ClassDecl* GetClassDecl();
 };
 
 /* This node type is used for those places where an expression is optional.
@@ -163,6 +167,9 @@ class LValue : public Expr
 {
   public:
     LValue(yyltype loc) : Expr(loc) {}
+
+    // TODO: Make into a pure virtual function
+    virtual Location* Emit(CodeGenerator *cg) { return NULL; }
 };
 
 class This : public Expr
@@ -193,6 +200,11 @@ class FieldAccess : public LValue
 
   public:
     FieldAccess(Expr *base, Identifier *field); //ok to pass NULL base
+
+    Location* Emit(CodeGenerator *cg);
+
+  private:
+    VarDecl* GetDecl();
 };
 
 /* Like field access, call is used both for qualified base.field()
