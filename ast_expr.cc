@@ -23,12 +23,20 @@ IntConstant::IntConstant(yyltype loc, int val) : Expr(loc) {
     value = val;
 }
 
+Type* IntConstant::GetType() {
+    return Type::intType;
+}
+
 Location* IntConstant::Emit(CodeGenerator *cg) {
     return cg->GenLoadConstant(value);
 }
 
 DoubleConstant::DoubleConstant(yyltype loc, double val) : Expr(loc) {
     value = val;
+}
+
+Type* DoubleConstant::GetType() {
+    return Type::doubleType;
 }
 
 Location* DoubleConstant::Emit(CodeGenerator *cg) {
@@ -44,6 +52,10 @@ BoolConstant::BoolConstant(yyltype loc, bool val) : Expr(loc) {
     value = val;
 }
 
+Type* BoolConstant::GetType() {
+    return Type::boolType;
+}
+
 Location* BoolConstant::Emit(CodeGenerator *cg) {
     /* From the PP4 assignment description (page 3):
      * "We treat bools just like ordinary 4-byte integers, which evaluate to 0
@@ -57,8 +69,16 @@ StringConstant::StringConstant(yyltype loc, const char *val) : Expr(loc) {
     value = strdup(val);
 }
 
+Type* StringConstant::GetType() {
+    return Type::stringType;
+}
+
 Location* StringConstant::Emit(CodeGenerator *cg) {
     return cg->GenLoadConstant(value);
+}
+
+Type* NullConstant::GetType() {
+    return Type::nullType;
 }
 
 Location* NullConstant::Emit(CodeGenerator *cg) {

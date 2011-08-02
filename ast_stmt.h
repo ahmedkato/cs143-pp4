@@ -156,6 +156,7 @@ class PrintStmt : public Stmt
     PrintStmt(List<Expr*> *arguments);
 
     void BuildScope();
+    Location* Emit(CodeGenerator *cg);
 };
 
 #endif

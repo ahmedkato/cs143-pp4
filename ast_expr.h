@@ -27,6 +27,8 @@ class Expr : public Stmt
     Expr(yyltype loc) : Stmt(loc) {}
     Expr() : Stmt() {}
 
+    // TODO: Make into a pure virtual function
+    virtual Type* GetType() { return NULL; }
     void BuildScope() { /* Empty */ }
 
   protected:
@@ -49,6 +51,7 @@ class IntConstant : public Expr
   public:
     IntConstant(yyltype loc, int val);
 
+    Type* GetType();
     Location* Emit(CodeGenerator *cg);
 };
 
@@ -60,6 +63,7 @@ class DoubleConstant : public Expr
   public:
     DoubleConstant(yyltype loc, double val);
 
+    Type* GetType();
     Location* Emit(CodeGenerator *cg);
 };
 
@@ -71,6 +75,7 @@ class BoolConstant : public Expr
   public:
     BoolConstant(yyltype loc, bool val);
 
+    Type* GetType();
     Location* Emit(CodeGenerator *cg);
 };
 
@@ -82,6 +87,7 @@ class StringConstant : public Expr
   public:
     StringConstant(yyltype loc, const char *val);
 
+    Type* GetType();
     Location* Emit(CodeGenerator *cg);
 };
 
@@ -90,6 +96,7 @@ class NullConstant: public Expr
   public:
     NullConstant(yyltype loc) : Expr(loc) {}
 
+    Type* GetType();
     Location* Emit(CodeGenerator *cg);
 };
 
