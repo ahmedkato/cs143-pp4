@@ -33,6 +33,7 @@ class Expr : public Stmt
 
   protected:
     Decl* GetFieldDecl(Identifier *field, Node *n);
+    Decl* GetFieldDecl(Identifier *field, Type *t);
     ClassDecl* GetClassDecl();
 };
 
@@ -209,6 +210,7 @@ class FieldAccess : public LValue
   public:
     FieldAccess(Expr *base, Identifier *field); //ok to pass NULL base
 
+    Type* GetType();
     Location* Emit(CodeGenerator *cg);
 
   private:

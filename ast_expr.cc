@@ -19,6 +19,24 @@ Decl* Expr::GetFieldDecl(Identifier *field, Node *n) {
     return NULL;
 }
 
+Decl* Expr::GetFieldDecl(Identifier *field, Type *t) {
+    // If t != NamedType then this sets t = NULL
+    t = dynamic_cast<NamedType*>(t);
+
+    while (t != NULL) {
+        Decl *tDecl = Program::gScope->table->Lookup(t->GetName());
+        Decl *d = GetFieldDecl(field, tDecl);
+        if (d != NULL)
+            return d;
+
+        if (dynamic_cast<ClassDecl*>(tDecl))
+            t = static_cast<ClassDecl*>(tDecl)->GetExtends();
+        else
+            break;
+    }
+    return NULL;
+}
+
 ClassDecl* Expr::GetClassDecl() {
     Node *n = this;
     while (n != NULL) {
@@ -160,6 +178,13 @@ FieldAccess::FieldAccess(Expr *b, Identifier *f)
     (field=f)->SetParent(this);
 }
 
+Type* FieldAccess::GetType() {
+    VarDecl *d = GetDecl();
+    if (d == NULL)
+        return NULL;
+    return d->GetType();
+}
+
 Location* FieldAccess::Emit(CodeGenerator *cg) {
     VarDecl *d = GetDecl();
     if (d == NULL)
@@ -169,15 +194,15 @@ Location* FieldAccess::Emit(CodeGenerator *cg) {
 }
 
 VarDecl* FieldAccess::GetDecl() {
-    if (base != NULL) return NULL; // TODO: Support cases when base != NULL
-
     ClassDecl *classDecl = GetClassDecl();
 
     Decl *d;
-    if (classDecl == NULL)
-        d = GetFieldDecl(field, this);
-    else
+    if (base != NULL)
+        d = GetFieldDecl(field, base->GetType());
+    else if (classDecl != NULL)
         d = GetFieldDecl(field, classDecl);
+    else
+        d = GetFieldDecl(field, this);
 
     return dynamic_cast<VarDecl*>(d);
 

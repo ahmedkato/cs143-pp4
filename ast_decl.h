@@ -52,6 +52,8 @@ class VarDecl : public Decl
   public:
     VarDecl(Identifier *name, Type *type);
 
+    Type* GetType() { return type; }
+
     void BuildScope() { /* Empty */ }
 
     Location* GetMemLoc() { return memLoc; }
@@ -68,6 +70,8 @@ class ClassDecl : public Decl
   public:
     ClassDecl(Identifier *name, NamedType *extends,
               List<NamedType*> *implements, List<Decl*> *members);
+
+    NamedType* GetExtends() { return extends; }
 
     void BuildScope();
 };
