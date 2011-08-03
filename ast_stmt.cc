@@ -152,6 +152,20 @@ void WhileStmt::BuildScope() {
     LoopStmt::BuildScope();
 }
 
+Location* WhileStmt::Emit(CodeGenerator *cg) {
+    const char* top = cg->NewLabel();
+    const char* bot = cg->NewLabel();
+
+    cg->GenLabel(top);
+    Location *t = test->Emit(cg);
+    cg->GenIfZ(t, bot);
+    body->Emit(cg);
+    cg->GenGoto(top);
+    cg->GenLabel(bot);
+
+    return NULL;
+}
+
 IfStmt::IfStmt(Expr *t, Stmt *tb, Stmt *eb): ConditionalStmt(t, tb) {
     Assert(t != NULL && tb != NULL); // else can be NULL
     elseBody = eb;

@@ -115,6 +115,7 @@ class WhileStmt : public LoopStmt
     WhileStmt(Expr *test, Stmt *body) : LoopStmt(test, body) {}
 
     void BuildScope();
+    Location* Emit(CodeGenerator *cg);
 };
 
 class IfStmt : public ConditionalStmt
