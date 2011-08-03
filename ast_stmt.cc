@@ -256,7 +256,7 @@ Location* PrintStmt::Emit(CodeGenerator *cg) {
              */
             Assert(0);
 
-        cg->GenBuiltInCall(PrintInt, e->Emit(cg));
+        cg->GenBuiltInCall(b, e->Emit(cg));
     }
 
     return NULL;
