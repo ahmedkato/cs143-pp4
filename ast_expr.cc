@@ -16,9 +16,9 @@ Decl* Expr::GetFieldDecl(Identifier *field, Expr *b) {
     if (b != NULL)
         d = GetFieldDecl(field, b->GetType());
     else if (classDecl != NULL)
-        d = GetFieldDecl(field, classDecl);
+        d = GetFieldDecl(field, static_cast<Node*>(classDecl));
     else
-        d = GetFieldDecl(field, this);
+        d = GetFieldDecl(field, static_cast<Node*>(this));
 
     return d;
 }
