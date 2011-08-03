@@ -195,6 +195,21 @@ void IfStmt::BuildScope() {
     if (elseBody) elseBody->BuildScope();
 }
 
+Location* IfStmt::Emit(CodeGenerator *cg) {
+    const char* els = cg->NewLabel();
+    const char* bot = cg->NewLabel();
+
+    Location *t = test->Emit(cg);
+    cg->GenIfZ(t, els);
+    body->Emit(cg);
+    cg->GenGoto(bot);
+    cg->GenLabel(els);
+    if (elseBody) elseBody->Emit(cg);
+    cg->GenLabel(bot);
+
+    return NULL;
+}
+
 ReturnStmt::ReturnStmt(yyltype loc, Expr *e) : Stmt(loc) {
     Assert(e != NULL);
     (expr=e)->SetParent(this);

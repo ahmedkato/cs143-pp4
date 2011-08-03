@@ -128,6 +128,7 @@ class IfStmt : public ConditionalStmt
     IfStmt(Expr *test, Stmt *thenBody, Stmt *elseBody);
 
     void BuildScope();
+    Location* Emit(CodeGenerator *cg);
 };
 
 class BreakStmt : public Stmt
