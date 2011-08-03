@@ -59,9 +59,7 @@ class Stmt : public Node
     Stmt(yyltype loc);
 
     virtual void BuildScope() = 0;
-
-    // TODO: Make into a pure virtual function
-    virtual Location* Emit(CodeGenerator *cg) { return NULL; }
+    virtual Location* Emit(CodeGenerator *cg) = 0;
 };
 
 class StmtBlock : public Stmt
@@ -137,6 +135,8 @@ class BreakStmt : public Stmt
     BreakStmt(yyltype loc) : Stmt(loc) {}
 
     void BuildScope() { /* Empty */ }
+    // TODO: Add Implementation
+    Location* Emit(CodeGenerator *cg) { return NULL; }
 };
 
 class ReturnStmt : public Stmt
@@ -148,6 +148,7 @@ class ReturnStmt : public Stmt
     ReturnStmt(yyltype loc, Expr *expr);
 
     void BuildScope();
+    Location* Emit(CodeGenerator *cg);
 };
 
 class PrintStmt : public Stmt

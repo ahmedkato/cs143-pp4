@@ -219,6 +219,15 @@ void ReturnStmt::BuildScope() {
     expr->BuildScope();
 }
 
+Location* ReturnStmt::Emit(CodeGenerator *cg) {
+    if (expr == NULL)
+        cg->GenReturn();
+    else
+        cg->GenReturn(expr->Emit(cg));
+
+    return NULL;
+}
+
 PrintStmt::PrintStmt(List<Expr*> *a) {
     Assert(a != NULL);
     (args=a)->SetParentAll(this);

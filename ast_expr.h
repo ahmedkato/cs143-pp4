@@ -30,6 +30,8 @@ class Expr : public Stmt
 
     virtual Type* GetType() = 0;
     void BuildScope() { /* Empty */ }
+    // TODO: Make into a pure virtual function
+    virtual Location* Emit(CodeGenerator *cg) { return NULL; }
 
   protected:
     Decl* GetFieldDecl(Identifier *field, Expr *b);
