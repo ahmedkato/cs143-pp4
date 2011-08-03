@@ -148,6 +148,23 @@ void ForStmt::BuildScope() {
     step->BuildScope();
 }
 
+Location* ForStmt::Emit(CodeGenerator *cg) {
+    const char* top = cg->NewLabel();
+    const char* bot = cg->NewLabel();
+
+    init->Emit(cg);
+    cg->GenLabel(top);
+    Location *t = test->Emit(cg);
+    cg->GenIfZ(t, bot);
+    body->Emit(cg);
+    step->Emit(cg);
+    cg->GenGoto(top);
+    cg->GenLabel(bot);
+
+    return NULL;
+
+}
+
 void WhileStmt::BuildScope() {
     LoopStmt::BuildScope();
 }

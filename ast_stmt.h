@@ -107,6 +107,7 @@ class ForStmt : public LoopStmt
     ForStmt(Expr *init, Expr *test, Expr *step, Stmt *body);
 
     void BuildScope();
+    Location* Emit(CodeGenerator *cg);
 };
 
 class WhileStmt : public LoopStmt
