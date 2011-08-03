@@ -27,6 +27,10 @@ ClassDecl::ClassDecl(Identifier *n, NamedType *ex, List<NamedType*> *imp, List<D
     (members=m)->SetParentAll(this);
 }
 
+NamedType* ClassDecl::GetType() {
+    return new NamedType(id);
+}
+
 void ClassDecl::BuildScope() {
     for (int i = 0, n = members->NumElements(); i < n; ++i)
         scope->AddDecl(members->Nth(i));

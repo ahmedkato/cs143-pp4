@@ -191,6 +191,8 @@ class This : public Expr
 {
   public:
     This(yyltype loc) : Expr(loc) {}
+
+    Type* GetType();
 };
 
 class ArrayAccess : public LValue
@@ -200,6 +202,8 @@ class ArrayAccess : public LValue
 
   public:
     ArrayAccess(yyltype loc, Expr *base, Expr *subscript);
+
+    Type* GetType();
 };
 
 /* Note that field access is used both for qualified names

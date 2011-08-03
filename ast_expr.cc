@@ -185,9 +185,20 @@ Location* AssignExpr::Emit(CodeGenerator *cg) {
     return NULL;
 }
 
+Type* This::GetType() {
+    ClassDecl *d = GetClassDecl();
+    if (d == NULL)
+        return NULL;
+    return d->GetType();
+}
+
 ArrayAccess::ArrayAccess(yyltype loc, Expr *b, Expr *s) : LValue(loc) {
     (base=b)->SetParent(this);
     (subscript=s)->SetParent(this);
+}
+
+Type* ArrayAccess::GetType() {
+    return base->GetType();
 }
 
 FieldAccess::FieldAccess(Expr *b, Identifier *f)

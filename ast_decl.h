@@ -71,6 +71,7 @@ class ClassDecl : public Decl
     ClassDecl(Identifier *name, NamedType *extends,
               List<NamedType*> *implements, List<Decl*> *members);
 
+    NamedType* GetType();
     NamedType* GetExtends() { return extends; }
 
     void BuildScope();
