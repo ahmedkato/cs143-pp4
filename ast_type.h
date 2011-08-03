@@ -28,6 +28,7 @@ class Type : public Node
 
     Type(yyltype loc) : Node(loc) {}
     Type(const char *str);
+    Type() : Node() {}
 
     virtual const char* GetName() { return typeName; }
 
@@ -56,6 +57,7 @@ class ArrayType : public Type
 
   public:
     ArrayType(yyltype loc, Type *elemType);
+    ArrayType(Type *elemType);
 
     const char* GetName() { return elemType->GetName(); }
 

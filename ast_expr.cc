@@ -285,8 +285,28 @@ NewExpr::NewExpr(yyltype loc, NamedType *c) : Expr(loc) {
   (cType=c)->SetParent(this);
 }
 
+Type* NewExpr::GetType() {
+    Decl *d = Program::gScope->table->Lookup(cType->GetName());
+    ClassDecl *c = dynamic_cast<ClassDecl*>(d);
+    if (c == NULL)
+        return NULL;
+    return c->GetType();
+}
+
 NewArrayExpr::NewArrayExpr(yyltype loc, Expr *sz, Type *et) : Expr(loc) {
     Assert(sz != NULL && et != NULL);
     (size=sz)->SetParent(this);
     (elemType=et)->SetParent(this);
+}
+
+Type* NewArrayExpr::GetType() {
+    return new ArrayType(elemType);
+}
+
+Type* ReadIntegerExpr::GetType() {
+    return Type::intType;
+}
+
+Type* ReadLineExpr::GetType() {
+    return Type::stringType;
 }

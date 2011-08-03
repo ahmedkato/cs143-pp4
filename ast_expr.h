@@ -28,8 +28,7 @@ class Expr : public Stmt
     Expr(yyltype loc) : Stmt(loc) {}
     Expr() : Stmt() {}
 
-    // TODO: Make into a pure virtual function
-    virtual Type* GetType() { return NULL; }
+    virtual Type* GetType() = 0;
     void BuildScope() { /* Empty */ }
 
   protected:
@@ -45,6 +44,7 @@ class Expr : public Stmt
 class EmptyExpr : public Expr
 {
   public:
+    Type* GetType() { return NULL; }
 };
 
 class IntConstant : public Expr
@@ -185,6 +185,7 @@ class LValue : public Expr
   public:
     LValue(yyltype loc) : Expr(loc) {}
 
+    Type* GetType() = 0;
     // TODO: Make into a pure virtual function
     virtual Location* Emit(CodeGenerator *cg) { return NULL; }
 };
@@ -257,6 +258,8 @@ class NewExpr : public Expr
 
   public:
     NewExpr(yyltype loc, NamedType *clsType);
+
+    Type* GetType();
 };
 
 class NewArrayExpr : public Expr
@@ -267,18 +270,24 @@ class NewArrayExpr : public Expr
 
   public:
     NewArrayExpr(yyltype loc, Expr *sizeExpr, Type *elemType);
+
+    Type* GetType();
 };
 
 class ReadIntegerExpr : public Expr
 {
   public:
     ReadIntegerExpr(yyltype loc) : Expr(loc) {}
+
+    Type* GetType();
 };
 
 class ReadLineExpr : public Expr
 {
   public:
     ReadLineExpr(yyltype loc) : Expr (loc) {}
+
+    Type* GetType();
 };
 
 #endif
