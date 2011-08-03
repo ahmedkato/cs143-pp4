@@ -20,6 +20,7 @@ class NamedType; // for new
 class Type; // for NewArray
 class CodeGenerator;
 class ClassDecl;
+class FnDecl;
 
 class Expr : public Stmt
 {
@@ -32,6 +33,7 @@ class Expr : public Stmt
     void BuildScope() { /* Empty */ }
 
   protected:
+    Decl* GetFieldDecl(Identifier *field, Expr *b);
     Decl* GetFieldDecl(Identifier *field, Node *n);
     Decl* GetFieldDecl(Identifier *field, Type *t);
     ClassDecl* GetClassDecl();
@@ -240,6 +242,12 @@ class Call : public Expr
 
   public:
     Call(yyltype loc, Expr *base, Identifier *field, List<Expr*> *args);
+
+    Type* GetType();
+
+  private:
+    FnDecl* GetDecl();
+    bool IsArrayLengthCall();
 };
 
 class NewExpr : public Expr

@@ -9,6 +9,20 @@
 #include "ast_decl.h"
 #include "codegen.h"
 
+Decl* Expr::GetFieldDecl(Identifier *field, Expr *b) {
+    ClassDecl *classDecl = GetClassDecl();
+
+    Decl *d;
+    if (b != NULL)
+        d = GetFieldDecl(field, b->GetType());
+    else if (classDecl != NULL)
+        d = GetFieldDecl(field, classDecl);
+    else
+        d = GetFieldDecl(field, this);
+
+    return d;
+}
+
 Decl* Expr::GetFieldDecl(Identifier *field, Node *n) {
     while (n != NULL) {
         Decl *d = n->GetScope()->table->Lookup(field->GetName());
@@ -225,16 +239,7 @@ Location* FieldAccess::Emit(CodeGenerator *cg) {
 }
 
 VarDecl* FieldAccess::GetDecl() {
-    ClassDecl *classDecl = GetClassDecl();
-
-    Decl *d;
-    if (base != NULL)
-        d = GetFieldDecl(field, base->GetType());
-    else if (classDecl != NULL)
-        d = GetFieldDecl(field, classDecl);
-    else
-        d = GetFieldDecl(field, this);
-
+    Decl *d = GetFieldDecl(field, base);
     return dynamic_cast<VarDecl*>(d);
 
 }
@@ -245,6 +250,34 @@ Call::Call(yyltype loc, Expr *b, Identifier *f, List<Expr*> *a) : Expr(loc)  {
     if (base) base->SetParent(this);
     (field=f)->SetParent(this);
     (actuals=a)->SetParentAll(this);
+}
+
+Type* Call::GetType() {
+    if (IsArrayLengthCall())
+        return Type::intType;
+
+    FnDecl *d = GetDecl();
+    if (d == NULL)
+        return NULL;
+    return d->GetType();
+}
+
+FnDecl* Call::GetDecl() {
+    Decl *d = GetFieldDecl(field, base);
+    return dynamic_cast<FnDecl*>(d);
+}
+
+bool Call::IsArrayLengthCall() {
+    if (base == NULL)
+        return false;
+
+    if (dynamic_cast<ArrayType*>(base->GetType()) == NULL)
+        return false;
+
+    if (strcmp("length", field->GetName()) != 0)
+        return false;
+
+    return true;
 }
 
 NewExpr::NewExpr(yyltype loc, NamedType *c) : Expr(loc) {
