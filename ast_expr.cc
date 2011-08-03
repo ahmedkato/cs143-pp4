@@ -142,20 +142,40 @@ Location* CompoundExpr::Emit(CodeGenerator *cg) {
     return cg->GenBinaryOp(op->GetTokenString(), ltemp, rtemp);
 }
 
+Type* ArithmeticExpr::GetType() {
+    return right->GetType();
+}
+
 Location* ArithmeticExpr::Emit(CodeGenerator *cg) {
     return CompoundExpr::Emit(cg);
+}
+
+Type* RelationalExpr::GetType() {
+    return Type::boolType;
 }
 
 Location* RelationalExpr::Emit(CodeGenerator *cg) {
     return CompoundExpr::Emit(cg);
 }
 
+Type* EqualityExpr::GetType() {
+    return Type::boolType;
+}
+
 Location* EqualityExpr::Emit(CodeGenerator *cg) {
     return CompoundExpr::Emit(cg);
 }
 
+Type* LogicalExpr::GetType() {
+    return Type::boolType;
+}
+
 Location* LogicalExpr::Emit(CodeGenerator *cg) {
     return CompoundExpr::Emit(cg);
+}
+
+Type* AssignExpr::GetType() {
+    return left->GetType();
 }
 
 Location* AssignExpr::Emit(CodeGenerator *cg) {
