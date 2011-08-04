@@ -196,6 +196,16 @@ class LogicalExpr : public CompoundExpr
     Type* GetType();
     Location* Emit(CodeGenerator *cg);
     int GetMemBytes();
+
+  private:
+    Location* EmitAnd(CodeGenerator *cg);
+    int GetMemBytesAnd();
+
+    Location* EmitOr(CodeGenerator *cg);
+    int GetMemBytesOr();
+
+    Location* EmitNot(CodeGenerator *cg);
+    int GetMemBytesNot();
 };
 
 class AssignExpr : public CompoundExpr

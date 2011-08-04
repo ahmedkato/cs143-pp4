@@ -326,11 +326,76 @@ Type* LogicalExpr::GetType() {
 }
 
 Location* LogicalExpr::Emit(CodeGenerator *cg) {
-    return CompoundExpr::Emit(cg);
+    const char *tok = op->GetTokenString();
+
+    if (strcmp("&&", tok) == 0)
+        return EmitAnd(cg);
+    else if (strcmp("||", tok) == 0)
+        return EmitOr(cg);
+    else if (strcmp("!", tok) == 0)
+        return EmitNot(cg);
+    else
+        Assert(0); // Should never reach this point!
+
+    return 0;
 }
 
 int LogicalExpr::GetMemBytes() {
-    return CompoundExpr::GetMemBytes();
+    const char *tok = op->GetTokenString();
+
+    if (strcmp("&&", tok) == 0)
+        return GetMemBytesAnd();
+    else if (strcmp("||", tok) == 0)
+        return GetMemBytesOr();
+    else if (strcmp("!", tok) == 0)
+        return GetMemBytesNot();
+    else
+        Assert(0); // Should never reach this point!
+
+    return 0;
+}
+
+Location* LogicalExpr::EmitAnd(CodeGenerator *cg) {
+    Location *ltmp = left->Emit(cg);
+    Location *rtmp = right->Emit(cg);
+
+    return cg->GenBinaryOp("&&", ltmp, rtmp);
+}
+
+int LogicalExpr::GetMemBytesAnd() {
+    return left->GetMemBytes() + right->GetMemBytes() + CodeGenerator::VarSize;
+}
+
+Location* LogicalExpr::EmitOr(CodeGenerator *cg) {
+    Location *ltmp = left->Emit(cg);
+    Location *rtmp = right->Emit(cg);
+
+    return cg->GenBinaryOp("||", ltmp, rtmp);
+}
+
+int LogicalExpr::GetMemBytesOr() {
+    return left->GetMemBytes() + right->GetMemBytes() + CodeGenerator::VarSize;
+}
+
+Location* LogicalExpr::EmitNot(CodeGenerator *cg) {
+    const char* ret_zro = cg->NewLabel();
+    const char* ret_one = cg->NewLabel();
+    Location *ret = cg->GenTempVar();
+
+    Location *rtmp = right->Emit(cg);
+
+    cg->GenIfZ(rtmp, ret_one);
+    cg->GenAssign(ret, cg->GenLoadConstant(0));
+    cg->GenGoto(ret_zro);
+    cg->GenLabel(ret_one);
+    cg->GenAssign(ret, cg->GenLoadConstant(1));
+    cg->GenLabel(ret_zro);
+
+    return ret;
+}
+
+int LogicalExpr::GetMemBytesNot() {
+    return right->GetMemBytes() + 3 * CodeGenerator::VarSize;
 }
 
 Type* AssignExpr::GetType() {
