@@ -168,28 +168,19 @@ CompoundExpr::CompoundExpr(Operator *o, Expr *r)
     (right=r)->SetParent(this);
 }
 
-Location* CompoundExpr::Emit(CodeGenerator *cg) {
-    Location *ltemp = left->Emit(cg);
-    Location *rtemp = right->Emit(cg);
-
-    // TODO: Simulate the unsupported operators
-    return cg->GenBinaryOp(op->GetTokenString(), ltemp, rtemp);
-}
-
-int CompoundExpr::GetMemBytes() {
-    return right->GetMemBytes() + left->GetMemBytes() + 4;
-}
-
 Type* ArithmeticExpr::GetType() {
     return right->GetType();
 }
 
 Location* ArithmeticExpr::Emit(CodeGenerator *cg) {
-    return CompoundExpr::Emit(cg);
+    Location *ltemp = left->Emit(cg);
+    Location *rtemp = right->Emit(cg);
+
+    return cg->GenBinaryOp(op->GetTokenString(), ltemp, rtemp);
 }
 
 int ArithmeticExpr::GetMemBytes() {
-    return CompoundExpr::GetMemBytes();
+    return right->GetMemBytes() + left->GetMemBytes() + CodeGenerator::VarSize;
 }
 
 Type* RelationalExpr::GetType() {
