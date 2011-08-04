@@ -15,6 +15,7 @@
 #include "list.h"
 #include "ast.h"
 #include "hashtable.h"
+#include <stack>
 
 class Decl;
 class VarDecl;
@@ -38,6 +39,7 @@ class Program : public Node
 {
   public:
     static Scope *gScope;
+    static stack<const char*> *gBreakLabels;
 
   protected:
      List<Decl*> *decls;
@@ -140,9 +142,8 @@ class BreakStmt : public Stmt
     BreakStmt(yyltype loc) : Stmt(loc) {}
 
     void BuildScope() { /* Empty */ }
-    // TODO: Add Implementation
-    Location* Emit(CodeGenerator *cg) { return NULL; }
-    int GetMemBytes() { return 0; }
+    Location* Emit(CodeGenerator *cg);
+    int GetMemBytes();
 };
 
 class ReturnStmt : public Stmt

@@ -11,6 +11,7 @@
 #include "hashtable.h"
 
 Scope *Program::gScope = new Scope;
+stack<const char*> *Program::gBreakLabels = new stack<const char*>;
 
 Scope::Scope() : table(new Hashtable<Decl*>) {
     // Empty
@@ -164,6 +165,8 @@ Location* ForStmt::Emit(CodeGenerator *cg) {
     const char* top = cg->NewLabel();
     const char* bot = cg->NewLabel();
 
+    Program::gBreakLabels->push(bot);
+
     init->Emit(cg);
     cg->GenLabel(top);
     Location *t = test->Emit(cg);
@@ -172,6 +175,8 @@ Location* ForStmt::Emit(CodeGenerator *cg) {
     step->Emit(cg);
     cg->GenGoto(top);
     cg->GenLabel(bot);
+
+    Program::gBreakLabels->pop();
 
     return NULL;
 
@@ -190,12 +195,16 @@ Location* WhileStmt::Emit(CodeGenerator *cg) {
     const char* top = cg->NewLabel();
     const char* bot = cg->NewLabel();
 
+    Program::gBreakLabels->push(bot);
+
     cg->GenLabel(top);
     Location *t = test->Emit(cg);
     cg->GenIfZ(t, bot);
     body->Emit(cg);
     cg->GenGoto(top);
     cg->GenLabel(bot);
+
+    Program::gBreakLabels->pop();
 
     return NULL;
 }
@@ -235,6 +244,15 @@ int IfStmt::GetMemBytes() {
     int memBytes = test->GetMemBytes() + body->GetMemBytes();
     if (elseBody) memBytes += elseBody->GetMemBytes();
     return memBytes;
+}
+
+Location* BreakStmt::Emit(CodeGenerator *cg) {
+    cg->GenGoto(Program::gBreakLabels->top());
+    return NULL;
+}
+
+int BreakStmt::GetMemBytes() {
+    return 0;
 }
 
 ReturnStmt::ReturnStmt(yyltype loc, Expr *e) : Stmt(loc) {
