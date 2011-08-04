@@ -18,6 +18,11 @@ VarDecl::VarDecl(Identifier *n, Type *t) : Decl(n) {
     (type=t)->SetParent(this);
 }
 
+int VarDecl::GetMemBytes() {
+    // TODO: Update to handle object sizes
+    return CodeGenerator::VarSize;
+}
+
 ClassDecl::ClassDecl(Identifier *n, NamedType *ex, List<NamedType*> *imp, List<Decl*> *m) : Decl(n) {
     // extends can be NULL, impl & mem may be empty lists but cannot be NULL
     Assert(n != NULL && imp != NULL && m != NULL);
@@ -74,9 +79,12 @@ void FnDecl::BuildScope() {
 }
 
 Location* FnDecl::Emit(CodeGenerator *cg) {
-    cg->GenLabel(GetName());
-
-    if (body) body->Emit(cg);
+    if (body != NULL) {
+        cg->GenLabel(GetName());
+        cg->GenBeginFunc()->SetFrameSize(body->GetMemBytes());
+        body->Emit(cg);
+        cg->GenEndFunc();
+    }
 
     return NULL;
 }

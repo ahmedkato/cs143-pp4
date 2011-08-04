@@ -60,6 +60,7 @@ class Stmt : public Node
 
     virtual void BuildScope() = 0;
     virtual Location* Emit(CodeGenerator *cg) = 0;
+    virtual int GetMemBytes() = 0;
 };
 
 class StmtBlock : public Stmt
@@ -73,6 +74,7 @@ class StmtBlock : public Stmt
 
     void BuildScope();
     Location* Emit(CodeGenerator *cg);
+    int GetMemBytes();
 };
 
 class ConditionalStmt : public Stmt
@@ -84,7 +86,7 @@ class ConditionalStmt : public Stmt
   public:
     ConditionalStmt(Expr *testExpr, Stmt *body);
 
-    void BuildScope() = 0;
+    virtual void BuildScope() = 0;
 };
 
 class LoopStmt : public ConditionalStmt
@@ -93,7 +95,7 @@ class LoopStmt : public ConditionalStmt
     LoopStmt(Expr *testExpr, Stmt *body)
             : ConditionalStmt(testExpr, body) {}
 
-    void BuildScope() = 0;
+    virtual void BuildScope() = 0;
 };
 
 class ForStmt : public LoopStmt
@@ -106,6 +108,7 @@ class ForStmt : public LoopStmt
 
     void BuildScope();
     Location* Emit(CodeGenerator *cg);
+    int GetMemBytes();
 };
 
 class WhileStmt : public LoopStmt
@@ -115,6 +118,7 @@ class WhileStmt : public LoopStmt
 
     void BuildScope();
     Location* Emit(CodeGenerator *cg);
+    int GetMemBytes();
 };
 
 class IfStmt : public ConditionalStmt
@@ -127,6 +131,7 @@ class IfStmt : public ConditionalStmt
 
     void BuildScope();
     Location* Emit(CodeGenerator *cg);
+    int GetMemBytes();
 };
 
 class BreakStmt : public Stmt
@@ -137,6 +142,7 @@ class BreakStmt : public Stmt
     void BuildScope() { /* Empty */ }
     // TODO: Add Implementation
     Location* Emit(CodeGenerator *cg) { return NULL; }
+    int GetMemBytes() { return 0; }
 };
 
 class ReturnStmt : public Stmt
@@ -149,6 +155,7 @@ class ReturnStmt : public Stmt
 
     void BuildScope();
     Location* Emit(CodeGenerator *cg);
+    int GetMemBytes();
 };
 
 class PrintStmt : public Stmt
@@ -161,6 +168,7 @@ class PrintStmt : public Stmt
 
     void BuildScope();
     Location* Emit(CodeGenerator *cg);
+    int GetMemBytes();
 };
 
 #endif

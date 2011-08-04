@@ -38,6 +38,7 @@ class Decl : public Node
 
     // TODO: Make into a pure virtual function
     virtual Location* Emit(CodeGenerator *cg) { return NULL; }
+    virtual int GetMemBytes() { return 0; }
 
     virtual Location* GetMemLoc() { return NULL; }
     virtual int SetMemLoc(Location *m) { return -ENOTSUP; }
@@ -55,6 +56,8 @@ class VarDecl : public Decl
     Type* GetType() { return type; }
 
     void BuildScope() { /* Empty */ }
+
+    int GetMemBytes();
 
     Location* GetMemLoc() { return memLoc; }
     int SetMemLoc(Location *m) { memLoc = m; return 0; }

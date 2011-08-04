@@ -30,8 +30,9 @@ class Expr : public Stmt
 
     virtual Type* GetType() = 0;
     void BuildScope() { /* Empty */ }
-    // TODO: Make into a pure virtual function
+    // TODO: Make into pure virtual functions
     virtual Location* Emit(CodeGenerator *cg) { return NULL; }
+    virtual int GetMemBytes() { return 0; }
 
   protected:
     Decl* GetFieldDecl(Identifier *field, Expr *b);
@@ -47,6 +48,7 @@ class EmptyExpr : public Expr
 {
   public:
     Type* GetType() { return NULL; }
+    int GetMemBytes() { return 0; }
 };
 
 class IntConstant : public Expr
@@ -59,6 +61,7 @@ class IntConstant : public Expr
 
     Type* GetType();
     Location* Emit(CodeGenerator *cg);
+    int GetMemBytes();
 };
 
 class DoubleConstant : public Expr
@@ -71,6 +74,7 @@ class DoubleConstant : public Expr
 
     Type* GetType();
     Location* Emit(CodeGenerator *cg);
+    int GetMemBytes();
 };
 
 class BoolConstant : public Expr
@@ -83,6 +87,7 @@ class BoolConstant : public Expr
 
     Type* GetType();
     Location* Emit(CodeGenerator *cg);
+    int GetMemBytes();
 };
 
 class StringConstant : public Expr
@@ -95,6 +100,7 @@ class StringConstant : public Expr
 
     Type* GetType();
     Location* Emit(CodeGenerator *cg);
+    int GetMemBytes();
 };
 
 class NullConstant: public Expr
@@ -104,6 +110,7 @@ class NullConstant: public Expr
 
     Type* GetType();
     Location* Emit(CodeGenerator *cg);
+    int GetMemBytes();
 };
 
 class Operator : public Node
@@ -128,8 +135,9 @@ class CompoundExpr : public Expr
     CompoundExpr(Expr *lhs, Operator *op, Expr *rhs); // for binary
     CompoundExpr(Operator *op, Expr *rhs);             // for unary
 
-    Type* GetType() = 0;
+    virtual Type* GetType() = 0;
     virtual Location* Emit(CodeGenerator *cg) = 0;
+    virtual int GetMemBytes() = 0;
 };
 
 class ArithmeticExpr : public CompoundExpr
@@ -140,6 +148,7 @@ class ArithmeticExpr : public CompoundExpr
 
     Type* GetType();
     Location* Emit(CodeGenerator *cg);
+    int GetMemBytes();
 };
 
 class RelationalExpr : public CompoundExpr
@@ -149,6 +158,7 @@ class RelationalExpr : public CompoundExpr
 
     Type* GetType();
     Location* Emit(CodeGenerator *cg);
+    int GetMemBytes();
 };
 
 class EqualityExpr : public CompoundExpr
@@ -159,6 +169,7 @@ class EqualityExpr : public CompoundExpr
 
     Type* GetType();
     Location* Emit(CodeGenerator *cg);
+    int GetMemBytes();
 };
 
 class LogicalExpr : public CompoundExpr
@@ -170,6 +181,7 @@ class LogicalExpr : public CompoundExpr
 
     Type* GetType();
     Location* Emit(CodeGenerator *cg);
+    int GetMemBytes();
 };
 
 class AssignExpr : public CompoundExpr
@@ -180,6 +192,7 @@ class AssignExpr : public CompoundExpr
 
     Type* GetType();
     Location* Emit(CodeGenerator *cg);
+    int GetMemBytes();
 };
 
 class LValue : public Expr
@@ -187,9 +200,10 @@ class LValue : public Expr
   public:
     LValue(yyltype loc) : Expr(loc) {}
 
-    Type* GetType() = 0;
-    // TODO: Make into a pure virtual function
+    virtual Type* GetType() = 0;
+    // TODO: Make into pure virtual functions
     virtual Location* Emit(CodeGenerator *cg) { return NULL; }
+    int GetMemBytes() { return 0; }
 };
 
 class This : public Expr
@@ -227,6 +241,7 @@ class FieldAccess : public LValue
 
     Type* GetType();
     Location* Emit(CodeGenerator *cg);
+    int GetMemBytes();
 
   private:
     VarDecl* GetDecl();

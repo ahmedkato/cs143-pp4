@@ -73,6 +73,10 @@ Location* IntConstant::Emit(CodeGenerator *cg) {
     return cg->GenLoadConstant(value);
 }
 
+int IntConstant::GetMemBytes() {
+    return 4;
+}
+
 DoubleConstant::DoubleConstant(yyltype loc, double val) : Expr(loc) {
     value = val;
 }
@@ -88,6 +92,10 @@ Location* DoubleConstant::Emit(CodeGenerator *cg) {
      */
     Assert(0);
     return NULL;
+}
+
+int DoubleConstant::GetMemBytes() {
+    return 4;
 }
 
 BoolConstant::BoolConstant(yyltype loc, bool val) : Expr(loc) {
@@ -106,6 +114,10 @@ Location* BoolConstant::Emit(CodeGenerator *cg) {
     return cg->GenLoadConstant(value ? 1 : 0);
 }
 
+int BoolConstant::GetMemBytes() {
+    return 4;
+}
+
 StringConstant::StringConstant(yyltype loc, const char *val) : Expr(loc) {
     Assert(val != NULL);
     value = strdup(val);
@@ -119,12 +131,20 @@ Location* StringConstant::Emit(CodeGenerator *cg) {
     return cg->GenLoadConstant(value);
 }
 
+int StringConstant::GetMemBytes() {
+    return 4;
+}
+
 Type* NullConstant::GetType() {
     return Type::nullType;
 }
 
 Location* NullConstant::Emit(CodeGenerator *cg) {
     return cg->GenLoadConstant(0);
+}
+
+int NullConstant::GetMemBytes() {
+    return 4;
 }
 
 Operator::Operator(yyltype loc, const char *tok) : Node(loc) {
@@ -156,12 +176,20 @@ Location* CompoundExpr::Emit(CodeGenerator *cg) {
     return cg->GenBinaryOp(op->GetTokenString(), ltemp, rtemp);
 }
 
+int CompoundExpr::GetMemBytes() {
+    return right->GetMemBytes() + left->GetMemBytes() + 4;
+}
+
 Type* ArithmeticExpr::GetType() {
     return right->GetType();
 }
 
 Location* ArithmeticExpr::Emit(CodeGenerator *cg) {
     return CompoundExpr::Emit(cg);
+}
+
+int ArithmeticExpr::GetMemBytes() {
+    return CompoundExpr::GetMemBytes();
 }
 
 Type* RelationalExpr::GetType() {
@@ -172,6 +200,10 @@ Location* RelationalExpr::Emit(CodeGenerator *cg) {
     return CompoundExpr::Emit(cg);
 }
 
+int RelationalExpr::GetMemBytes() {
+    return CompoundExpr::GetMemBytes();
+}
+
 Type* EqualityExpr::GetType() {
     return Type::boolType;
 }
@@ -180,12 +212,20 @@ Location* EqualityExpr::Emit(CodeGenerator *cg) {
     return CompoundExpr::Emit(cg);
 }
 
+int EqualityExpr::GetMemBytes() {
+    return CompoundExpr::GetMemBytes();
+}
+
 Type* LogicalExpr::GetType() {
     return Type::boolType;
 }
 
 Location* LogicalExpr::Emit(CodeGenerator *cg) {
     return CompoundExpr::Emit(cg);
+}
+
+int LogicalExpr::GetMemBytes() {
+    return CompoundExpr::GetMemBytes();
 }
 
 Type* AssignExpr::GetType() {
@@ -197,6 +237,10 @@ Location* AssignExpr::Emit(CodeGenerator *cg) {
     Location *rtemp = right->Emit(cg);
     cg->GenAssign(ltemp, rtemp);
     return NULL;
+}
+
+int AssignExpr::GetMemBytes() {
+    return left->GetMemBytes() + right->GetMemBytes();
 }
 
 Type* This::GetType() {
@@ -236,6 +280,10 @@ Location* FieldAccess::Emit(CodeGenerator *cg) {
         return NULL;
 
     return d->GetMemLoc();
+}
+
+int FieldAccess::GetMemBytes() {
+    return 0;
 }
 
 VarDecl* FieldAccess::GetDecl() {

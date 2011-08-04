@@ -109,7 +109,7 @@ Location* StmtBlock::Emit(CodeGenerator *cg) {
         Decl *d = decls->Nth(i);
         Location *loc = new Location(fpRelative, offset, d->GetName());
         if (d->SetMemLoc(loc) == 0)
-            offset -= CodeGenerator::VarSize;
+            offset -= d->GetMemBytes();
     }
 
     cg->SetLocalOffset(offset);
@@ -118,6 +118,18 @@ Location* StmtBlock::Emit(CodeGenerator *cg) {
         stmts->Nth(i)->Emit(cg);
 
     return NULL;
+}
+
+int StmtBlock::GetMemBytes() {
+    int memBytes = 0;
+
+    for (int i = 0, n = decls->NumElements(); i < n; ++i)
+        memBytes += decls->Nth(i)->GetMemBytes();
+
+    for (int i = 0, n = stmts->NumElements(); i < n; ++i)
+        memBytes += stmts->Nth(i)->GetMemBytes();
+
+    return memBytes;
 }
 
 ConditionalStmt::ConditionalStmt(Expr *t, Stmt *b) {
@@ -165,6 +177,11 @@ Location* ForStmt::Emit(CodeGenerator *cg) {
 
 }
 
+int ForStmt::GetMemBytes() {
+    return init->GetMemBytes() + test->GetMemBytes() +
+           body->GetMemBytes() + step->GetMemBytes();
+}
+
 void WhileStmt::BuildScope() {
     LoopStmt::BuildScope();
 }
@@ -181,6 +198,10 @@ Location* WhileStmt::Emit(CodeGenerator *cg) {
     cg->GenLabel(bot);
 
     return NULL;
+}
+
+int WhileStmt::GetMemBytes() {
+    return test->GetMemBytes() + body->GetMemBytes();
 }
 
 IfStmt::IfStmt(Expr *t, Stmt *tb, Stmt *eb): ConditionalStmt(t, tb) {
@@ -210,6 +231,12 @@ Location* IfStmt::Emit(CodeGenerator *cg) {
     return NULL;
 }
 
+int IfStmt::GetMemBytes() {
+    int memBytes = test->GetMemBytes() + body->GetMemBytes();
+    if (elseBody) memBytes += elseBody->GetMemBytes();
+    return memBytes;
+}
+
 ReturnStmt::ReturnStmt(yyltype loc, Expr *e) : Stmt(loc) {
     Assert(e != NULL);
     (expr=e)->SetParent(this);
@@ -226,6 +253,13 @@ Location* ReturnStmt::Emit(CodeGenerator *cg) {
         cg->GenReturn(expr->Emit(cg));
 
     return NULL;
+}
+
+int ReturnStmt::GetMemBytes() {
+    if (expr == NULL)
+        return 0;
+    else
+        return expr->GetMemBytes();
 }
 
 PrintStmt::PrintStmt(List<Expr*> *a) {
@@ -260,4 +294,11 @@ Location* PrintStmt::Emit(CodeGenerator *cg) {
     }
 
     return NULL;
+}
+
+int PrintStmt::GetMemBytes() {
+    int memBytes = 0;
+    for (int i = 0, n = args->NumElements(); i < n; ++i)
+        memBytes += args->Nth(i)->GetMemBytes();
+   return memBytes;
 }
