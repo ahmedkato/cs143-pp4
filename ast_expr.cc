@@ -260,11 +260,65 @@ Type* EqualityExpr::GetType() {
 }
 
 Location* EqualityExpr::Emit(CodeGenerator *cg) {
-    return CompoundExpr::Emit(cg);
+    const char *tok = op->GetTokenString();
+
+    if (strcmp("==", tok) == 0)
+        return EmitEqual(cg);
+    else if (strcmp("!=", tok) == 0)
+        return EmitNotEqual(cg);
+    else
+        Assert(0); // Should never reach this point!
+
+    return NULL;
 }
 
 int EqualityExpr::GetMemBytes() {
-    return CompoundExpr::GetMemBytes();
+    const char *tok = op->GetTokenString();
+
+    if (strcmp("==", tok) == 0)
+        return GetMemBytesEqual();
+    else if (strcmp("!=", tok) == 0)
+        return GetMemBytesNotEqual();
+    else
+        Assert(0); // Should never reach this point!
+
+    return 0;
+}
+
+Location* EqualityExpr::EmitEqual(CodeGenerator *cg) {
+    Location *ltmp = left->Emit(cg);
+    Location *rtmp = right->Emit(cg);
+
+    return cg->GenBinaryOp("==", ltmp, rtmp);
+}
+
+int EqualityExpr::GetMemBytesEqual() {
+    return left->GetMemBytes() + right->GetMemBytes() + CodeGenerator::VarSize;
+}
+
+Location* EqualityExpr::EmitNotEqual(CodeGenerator *cg) {
+    const char* ret_zro = cg->NewLabel();
+    const char* ret_one = cg->NewLabel();
+    Location *ret = cg->GenTempVar();
+
+    Location *ltmp = left->Emit(cg);
+    Location *rtmp = right->Emit(cg);
+
+    Location *equal = cg->GenBinaryOp("==", ltmp, rtmp);
+
+    cg->GenIfZ(equal, ret_one);
+    cg->GenAssign(ret, cg->GenLoadConstant(0));
+    cg->GenGoto(ret_zro);
+    cg->GenLabel(ret_one);
+    cg->GenAssign(ret, cg->GenLoadConstant(1));
+    cg->GenLabel(ret_zro);
+
+    return ret;
+}
+
+int EqualityExpr::GetMemBytesNotEqual() {
+    return left->GetMemBytes() + right->GetMemBytes() +
+           4 * CodeGenerator::VarSize;
 }
 
 Type* LogicalExpr::GetType() {

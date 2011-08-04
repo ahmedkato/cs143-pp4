@@ -177,6 +177,13 @@ class EqualityExpr : public CompoundExpr
     Type* GetType();
     Location* Emit(CodeGenerator *cg);
     int GetMemBytes();
+
+  private:
+    Location* EmitEqual(CodeGenerator *cg);
+    int GetMemBytesEqual();
+
+    Location* EmitNotEqual(CodeGenerator *cg);
+    int GetMemBytesNotEqual();
 };
 
 class LogicalExpr : public CompoundExpr
