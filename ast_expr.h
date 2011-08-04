@@ -159,6 +159,13 @@ class RelationalExpr : public CompoundExpr
     Type* GetType();
     Location* Emit(CodeGenerator *cg);
     int GetMemBytes();
+
+  private:
+    Location* EmitLess(CodeGenerator *cg, Expr *l, Expr *r);
+    int GetMemBytesLess(Expr *l, Expr *r);
+
+    Location* EmitLessEqual(CodeGenerator *cg, Expr *l, Expr *r);
+    int GetMemBytesLessEqual(Expr *l, Expr *r);
 };
 
 class EqualityExpr : public CompoundExpr

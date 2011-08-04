@@ -197,11 +197,62 @@ Type* RelationalExpr::GetType() {
 }
 
 Location* RelationalExpr::Emit(CodeGenerator *cg) {
-    return CompoundExpr::Emit(cg);
+    const char *tok = op->GetTokenString();
+
+    if (strcmp("<", tok) == 0)
+        return EmitLess(cg, left, right);
+    else if (strcmp("<=", tok) == 0)
+        return EmitLessEqual(cg, left, right);
+    else if (strcmp(">", tok) == 0)
+        return EmitLess(cg, right, left);
+    else if (strcmp(">=", tok) == 0)
+        return EmitLessEqual(cg, right, left);
+    else
+        Assert(0); // Should never reach this point!
+
+    return NULL;
 }
 
 int RelationalExpr::GetMemBytes() {
-    return CompoundExpr::GetMemBytes();
+    const char *tok = op->GetTokenString();
+
+    if (strcmp("<", tok) == 0)
+        return GetMemBytesLess(left, right);
+    else if (strcmp("<=", tok) == 0)
+        return GetMemBytesLessEqual(left, right);
+    else if (strcmp(">", tok) == 0)
+        return GetMemBytesLess(right, left);
+    else if (strcmp(">=", tok) == 0)
+        return GetMemBytesLessEqual(right, left);
+    else
+        Assert(0); // Should never reach this point!
+
+    return 0;
+}
+
+Location* RelationalExpr::EmitLess(CodeGenerator *cg, Expr *l, Expr *r) {
+    Location *ltmp = l->Emit(cg);
+    Location *rtmp = r->Emit(cg);
+
+    return cg->GenBinaryOp("<", ltmp, rtmp);
+}
+
+int RelationalExpr::GetMemBytesLess(Expr *l, Expr *r) {
+    return l->GetMemBytes() + r->GetMemBytes() + CodeGenerator::VarSize;
+}
+
+Location* RelationalExpr::EmitLessEqual(CodeGenerator *cg, Expr *l, Expr *r) {
+    Location *ltmp = l->Emit(cg);
+    Location *rtmp = r->Emit(cg);
+
+    Location *less = cg->GenBinaryOp("<", ltmp, rtmp);
+    Location *equal = cg->GenBinaryOp("==", ltmp, rtmp);
+
+    return cg->GenBinaryOp("||", less, equal);
+}
+
+int RelationalExpr::GetMemBytesLessEqual(Expr *l, Expr *r) {
+    return l->GetMemBytes() + r->GetMemBytes() + 3 * CodeGenerator::VarSize;
 }
 
 Type* EqualityExpr::GetType() {
