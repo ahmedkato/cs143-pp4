@@ -293,8 +293,16 @@ class Call : public Expr
     Call(yyltype loc, Expr *base, Identifier *field, List<Expr*> *args);
 
     Type* GetType();
+    Location* Emit(CodeGenerator *cg);
+    int GetMemBytes();
 
   private:
+    Location* EmitLabel(CodeGenerator *cg);
+    int GetMemBytesLabel();
+
+    Location* EmitArrayLength(CodeGenerator *cg);
+    int GetMemBytesArrayLength();
+
     FnDecl* GetDecl();
     bool IsArrayLengthCall();
 };

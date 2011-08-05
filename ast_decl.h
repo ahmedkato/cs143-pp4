@@ -99,6 +99,8 @@ class FnDecl : public Decl
     void SetFunctionBody(Stmt *b);
 
     Type* GetType() { return returnType; }
+    const char* GetLabel();
+    bool HasReturnVal();
 
     void BuildScope();
     Location* Emit(CodeGenerator *cg);

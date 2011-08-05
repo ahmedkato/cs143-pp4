@@ -496,6 +496,62 @@ Type* Call::GetType() {
     return d->GetType();
 }
 
+Location* Call::Emit(CodeGenerator *cg) {
+    if (IsArrayLengthCall())
+        return EmitArrayLength(cg);
+
+    return EmitLabel(cg);
+}
+
+int Call::GetMemBytes() {
+    if (IsArrayLengthCall())
+        return GetMemBytesArrayLength();
+
+    return GetMemBytesLabel();
+}
+
+Location* Call::EmitLabel(CodeGenerator *cg) {
+    if (base != NULL) // TODO: Add support for base != NULL
+        return NULL;
+
+    List<Location*> *params = new List<Location*>;
+    for (int i = 0, n = actuals->NumElements(); i < n; ++i)
+        params->Append(actuals->Nth(i)->Emit(cg));
+
+    int n = params->NumElements();
+    for (int i = n-1; i >= 0; --i)
+        cg->GenPushParam(params->Nth(i));
+
+    Location *ret = cg->GenLCall(field->GetName(), GetDecl()->HasReturnVal());
+
+    // TODO: Support variable Object sizes
+    cg->GenPopParams(n * CodeGenerator::VarSize);
+
+    return ret;
+}
+
+int Call::GetMemBytesLabel() {
+    if (base != NULL) // TODO: Add support for base != NULL
+        return 0;
+
+    int memBytes = 0;
+    for (int i = 0, n = actuals->NumElements(); i < n; ++i)
+        memBytes += actuals->Nth(i)->GetMemBytes();
+
+    if (GetDecl()->HasReturnVal())
+        memBytes += CodeGenerator::VarSize;
+
+    return memBytes;
+}
+
+Location* Call::EmitArrayLength(CodeGenerator *cg) {
+    return NULL; // TODO: Add Implementation
+}
+
+int Call::GetMemBytesArrayLength() {
+    return 0; // TODO: Add Implementation
+}
+
 FnDecl* Call::GetDecl() {
     Decl *d = GetFieldDecl(field, base);
     return dynamic_cast<FnDecl*>(d);

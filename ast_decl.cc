@@ -68,6 +68,14 @@ void FnDecl::SetFunctionBody(Stmt *b) {
     (body=b)->SetParent(this);
 }
 
+const char* FnDecl::GetLabel() {
+    return GetName();
+}
+
+bool FnDecl::HasReturnVal() {
+    return returnType == Type::voidType ? 0 : 1;
+}
+
 void FnDecl::BuildScope() {
     for (int i = 0, n = formals->NumElements(); i < n; ++i)
         scope->AddDecl(formals->Nth(i));
@@ -79,6 +87,14 @@ void FnDecl::BuildScope() {
 }
 
 Location* FnDecl::Emit(CodeGenerator *cg) {
+    int offset = CodeGenerator::OffsetToFirstParam;
+    for (int i = 0, n = formals->NumElements(); i < n; ++i) {
+        VarDecl *d = formals->Nth(i);
+        Location *loc = new Location(fpRelative, offset, d->GetName());
+        d->SetMemLoc(loc);
+        offset += d->GetMemBytes();
+    }
+
     if (body != NULL) {
         cg->GenLabel(GetName());
         cg->GenBeginFunc()->SetFrameSize(body->GetMemBytes());
