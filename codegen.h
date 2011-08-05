@@ -46,8 +46,6 @@ class CodeGenerator {
 
     CodeGenerator();
 
-    void SetLocalOffset(int offset) { localOffset = offset; }
-
          // Assigns a new unique label name and returns it. Does not
          // generate any Tac instructions (see GenLabel below if needed)
     char *NewLabel();
@@ -55,6 +53,7 @@ class CodeGenerator {
          // Creates and returns a Location for a new uniquely named
          // temp variable. Does not generate any Tac instructions
     Location *GenTempVar();
+    Location *GenLocalVar(const char *name, int size);
 
          // Generates Tac instructions to load a constant value. Creates
          // a new temp var to hold the result. The constant

@@ -66,10 +66,13 @@ void Program::Emit() {
     int offset = CodeGenerator::OffsetToFirstGlobal;
 
     for (int i = 0, n = decls->NumElements(); i < n; ++i) {
-        Decl *d = decls->Nth(i);
+        VarDecl *d = dynamic_cast<VarDecl*>(decls->Nth(i));
+        if (d == NULL)
+            continue;
+
         Location *loc = new Location(gpRelative, offset, d->GetName());
-        if (d->SetMemLoc(loc) == 0)
-            offset += CodeGenerator::VarSize;
+        d->SetMemLoc(loc);
+        offset += d->GetMemBytes();
     }
 
     for (int i = 0, n = decls->NumElements(); i < n; ++i)
@@ -104,16 +107,13 @@ void StmtBlock::BuildScope() {
 }
 
 Location* StmtBlock::Emit(CodeGenerator *cg) {
-    int offset = CodeGenerator::OffsetToFirstLocal;
-
     for (int i = 0, n = decls->NumElements(); i < n; ++i) {
-        Decl *d = decls->Nth(i);
-        Location *loc = new Location(fpRelative, offset, d->GetName());
-        if (d->SetMemLoc(loc) == 0)
-            offset -= d->GetMemBytes();
+        VarDecl *d = dynamic_cast<VarDecl*>(decls->Nth(i));
+        if (d == NULL)
+            continue;
+        Location *loc = cg->GenLocalVar(d->GetName(), d->GetMemBytes());
+        d->SetMemLoc(loc);
     }
-
-    cg->SetLocalOffset(offset);
 
     for (int i = 0, n = stmts->NumElements(); i < n; ++i)
         stmts->Nth(i)->Emit(cg);

@@ -41,6 +41,13 @@ Location *CodeGenerator::GenTempVar()
   return result;
 }
 
+Location *CodeGenerator::GenLocalVar(const char *name, int size)
+{
+    Location *result = new Location(fpRelative, localOffset, name);
+    localOffset -= size;
+    return result;
+}
+
 Location *CodeGenerator::GenLoadConstant(int value)
 {
   Location *result = GenTempVar();
@@ -109,6 +116,7 @@ void CodeGenerator::GenReturn(Location *val)
 
 BeginFunc *CodeGenerator::GenBeginFunc()
 {
+  localOffset = OffsetToFirstLocal;
   BeginFunc *result = new BeginFunc;
   code->Append(result);
   return result;
