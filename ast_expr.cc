@@ -397,7 +397,7 @@ Location* AssignExpr::Emit(CodeGenerator *cg) {
     Location *ltemp = left->Emit(cg);
     Location *rtemp = right->Emit(cg);
     cg->GenAssign(ltemp, rtemp);
-    return NULL;
+    return ltemp;
 }
 
 int AssignExpr::GetMemBytes() {
