@@ -173,13 +173,38 @@ Type* ArithmeticExpr::GetType() {
 }
 
 Location* ArithmeticExpr::Emit(CodeGenerator *cg) {
+    if (left == NULL)
+        return EmitUnary(cg);
+    else
+        return EmitBinary(cg);
+}
+
+int ArithmeticExpr::GetMemBytes() {
+    if (left == NULL)
+        return GetMemBytesUnary();
+    else
+        return GetMemBytesBinary();
+}
+
+Location* ArithmeticExpr::EmitUnary(CodeGenerator *cg) {
+    Location *rtemp = right->Emit(cg);
+
+    Location *zero = cg->GenLoadConstant(0);
+    return cg->GenBinaryOp(op->GetTokenString(), zero, rtemp);
+}
+
+int ArithmeticExpr::GetMemBytesUnary() {
+    return right->GetMemBytes() + 2 * CodeGenerator::VarSize;
+}
+
+Location* ArithmeticExpr::EmitBinary(CodeGenerator *cg) {
     Location *ltemp = left->Emit(cg);
     Location *rtemp = right->Emit(cg);
 
     return cg->GenBinaryOp(op->GetTokenString(), ltemp, rtemp);
 }
 
-int ArithmeticExpr::GetMemBytes() {
+int ArithmeticExpr::GetMemBytesBinary() {
     return right->GetMemBytes() + left->GetMemBytes() + CodeGenerator::VarSize;
 }
 

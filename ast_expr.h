@@ -149,6 +149,13 @@ class ArithmeticExpr : public CompoundExpr
     Type* GetType();
     Location* Emit(CodeGenerator *cg);
     int GetMemBytes();
+
+  private:
+    Location* EmitUnary(CodeGenerator *cg);
+    int GetMemBytesUnary();
+
+    Location* EmitBinary(CodeGenerator *cg);
+    int GetMemBytesBinary();
 };
 
 class RelationalExpr : public CompoundExpr
