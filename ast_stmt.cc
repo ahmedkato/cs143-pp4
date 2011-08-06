@@ -293,20 +293,13 @@ void PrintStmt::BuildScope() {
 Location* PrintStmt::Emit(CodeGenerator *cg) {
     for (int i = 0, n = args->NumElements(); i < n; ++i) {
         Expr *e = args->Nth(i);
-        Type *t = e->GetType();
-        BuiltIn b = NumBuiltIns;
-        if (t == Type::intType)
-            b = PrintInt;
-        else if (t == Type::boolType)
-            b = PrintBool;
-        else if (t == Type::stringType)
-            b = PrintString;
-        else
-            /* Print can only take ints, bools, or strings as parameters
-             * (remember, doubles need not be supported for PP4). Thus, we
-             * should never reach this Assert statement.
-             */
-            Assert(0);
+        BuiltIn b = e->GetType()->GetPrint();
+        /* Print can only take ints, bools, or strings as parameters
+         * (remember, doubles need not be supported for PP4). GetPrint()
+         * should only return NumBuiltIns if the type is not an int, bool,
+         * or string. This should never happen.
+         */
+        Assert(b != NumBuiltIns);
 
         cg->GenBuiltInCall(b, e->Emit(cg));
     }

@@ -15,6 +15,7 @@
 #include "ast.h"
 #include "list.h"
 #include <iostream>
+#include "codegen.h"
 using namespace std;
 
 class Type : public Node
@@ -35,6 +36,7 @@ class Type : public Node
     virtual void PrintToStream(ostream& out) { out << typeName; }
     friend ostream& operator<<(ostream& out, Type *t) { t->PrintToStream(out); return out; }
     virtual bool IsEquivalentTo(Type *other) { return this == other; }
+    virtual BuiltIn GetPrint();
 };
 
 class NamedType : public Type
@@ -48,6 +50,7 @@ class NamedType : public Type
     const char* GetName() { return id->GetName(); }
 
     void PrintToStream(ostream& out) { out << id; }
+    BuiltIn GetPrint();
 };
 
 class ArrayType : public Type
@@ -62,6 +65,7 @@ class ArrayType : public Type
     const char* GetName() { return elemType->GetName(); }
 
     void PrintToStream(ostream& out) { out << elemType << "[]"; }
+    BuiltIn GetPrint();
 };
 
 #endif
