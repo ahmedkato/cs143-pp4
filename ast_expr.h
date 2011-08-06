@@ -30,9 +30,8 @@ class Expr : public Stmt
 
     virtual Type* GetType() = 0;
     void BuildScope() { /* Empty */ }
-    // TODO: Make into pure virtual functions
-    virtual Location* Emit(CodeGenerator *cg) { return NULL; }
-    virtual int GetMemBytes() { return 0; }
+    virtual Location* Emit(CodeGenerator *cg) = 0;
+    virtual int GetMemBytes() = 0;
 
   protected:
     Decl* GetFieldDecl(Identifier *field, Expr *b);
@@ -48,6 +47,7 @@ class EmptyExpr : public Expr
 {
   public:
     Type* GetType() { return NULL; }
+    Location* Emit(CodeGenerator *cg) { return NULL; }
     int GetMemBytes() { return 0; }
 };
 
@@ -232,9 +232,8 @@ class LValue : public Expr
     LValue(yyltype loc) : Expr(loc) {}
 
     virtual Type* GetType() = 0;
-    // TODO: Make into pure virtual functions
-    virtual Location* Emit(CodeGenerator *cg) { return NULL; }
-    int GetMemBytes() { return 0; }
+    virtual Location* Emit(CodeGenerator *cg) = 0;
+    virtual int GetMemBytes() = 0;
 };
 
 class This : public Expr
@@ -243,6 +242,10 @@ class This : public Expr
     This(yyltype loc) : Expr(loc) {}
 
     Type* GetType();
+
+    // TODO: Add Implemenation
+    Location* Emit(CodeGenerator *cg) { return NULL; }
+    int GetMemBytes() { return 0; }
 };
 
 class ArrayAccess : public LValue
@@ -254,6 +257,10 @@ class ArrayAccess : public LValue
     ArrayAccess(yyltype loc, Expr *base, Expr *subscript);
 
     Type* GetType();
+
+    // TODO: Add Implemenation
+    Location* Emit(CodeGenerator *cg) { return NULL; }
+    int GetMemBytes() { return 0; }
 };
 
 /* Note that field access is used both for qualified names
@@ -316,6 +323,10 @@ class NewExpr : public Expr
     NewExpr(yyltype loc, NamedType *clsType);
 
     Type* GetType();
+
+    // TODO: Add Implemenation
+    Location* Emit(CodeGenerator *cg) { return NULL; }
+    int GetMemBytes() { return 0; }
 };
 
 class NewArrayExpr : public Expr
@@ -328,6 +339,10 @@ class NewArrayExpr : public Expr
     NewArrayExpr(yyltype loc, Expr *sizeExpr, Type *elemType);
 
     Type* GetType();
+
+    // TODO: Add Implemenation
+    Location* Emit(CodeGenerator *cg) { return NULL; }
+    int GetMemBytes() { return 0; }
 };
 
 class ReadIntegerExpr : public Expr
