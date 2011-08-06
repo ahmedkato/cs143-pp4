@@ -597,6 +597,22 @@ Type* ReadIntegerExpr::GetType() {
     return Type::intType;
 }
 
+Location* ReadIntegerExpr::Emit(CodeGenerator *cg) {
+    return cg->GenBuiltInCall(ReadInteger);
+}
+
+int ReadIntegerExpr::GetMemBytes() {
+    return CodeGenerator::VarSize;
+}
+
 Type* ReadLineExpr::GetType() {
     return Type::stringType;
+}
+
+Location* ReadLineExpr::Emit(CodeGenerator *cg) {
+    return cg->GenBuiltInCall(ReadLine);
+}
+
+int ReadLineExpr::GetMemBytes() {
+    return CodeGenerator::VarSize;
 }

@@ -27,7 +27,11 @@ for file in $LIST; do
 	fi
 
 	tmp=${TMP:-"/tmp"}/check.tmp
-	sh run $base.$ext 1>$tmp 2>&1
+	if [ -r $base.in ]; then
+		sh run $base.$ext 1>$tmp 2>&1 < $base.in
+	else
+		sh run $base.$ext 1>$tmp 2>&1
+	fi
 
 	printf "Checking %-27s: " $file
 	if ! cmp -s $tmp $file; then

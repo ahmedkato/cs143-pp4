@@ -336,6 +336,8 @@ class ReadIntegerExpr : public Expr
     ReadIntegerExpr(yyltype loc) : Expr(loc) {}
 
     Type* GetType();
+    Location* Emit(CodeGenerator *cg);
+    int GetMemBytes();
 };
 
 class ReadLineExpr : public Expr
@@ -344,6 +346,8 @@ class ReadLineExpr : public Expr
     ReadLineExpr(yyltype loc) : Expr (loc) {}
 
     Type* GetType();
+    Location* Emit(CodeGenerator *cg);
+    int GetMemBytes();
 };
 
 #endif
