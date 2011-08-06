@@ -545,11 +545,11 @@ int Call::GetMemBytesLabel() {
 }
 
 Location* Call::EmitArrayLength(CodeGenerator *cg) {
-    return NULL; // TODO: Add Implementation
+    return cg->GenLoad(base->Emit(cg));
 }
 
 int Call::GetMemBytesArrayLength() {
-    return 0; // TODO: Add Implementation
+    return base->GetMemBytes() + CodeGenerator::VarSize;
 }
 
 FnDecl* Call::GetDecl() {
