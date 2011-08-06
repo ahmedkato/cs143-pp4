@@ -339,10 +339,8 @@ class NewArrayExpr : public Expr
     NewArrayExpr(yyltype loc, Expr *sizeExpr, Type *elemType);
 
     Type* GetType();
-
-    // TODO: Add Implemenation
-    Location* Emit(CodeGenerator *cg) { return NULL; }
-    int GetMemBytes() { return 0; }
+    Location* Emit(CodeGenerator *cg);
+    int GetMemBytes();
 };
 
 class ReadIntegerExpr : public Expr

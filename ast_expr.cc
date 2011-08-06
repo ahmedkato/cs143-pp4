@@ -593,6 +593,20 @@ Type* NewArrayExpr::GetType() {
     return new ArrayType(elemType);
 }
 
+Location* NewArrayExpr::Emit(CodeGenerator *cg) {
+    Location *s = size->Emit(cg);
+    Location *n = cg->GenLoadConstant(CodeGenerator::VarSize);
+
+    Location *mem = cg->GenBuiltInCall(Alloc, cg->GenBinaryOp("+", s, n));
+    cg->GenStore(mem, s);
+
+    return mem;
+}
+
+int NewArrayExpr::GetMemBytes() {
+    return size->GetMemBytes() + 3 * CodeGenerator::VarSize;
+}
+
 Type* ReadIntegerExpr::GetType() {
     return Type::intType;
 }
