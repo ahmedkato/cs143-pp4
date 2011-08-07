@@ -38,6 +38,7 @@ class Decl : public Node
     // TODO: Make into a pure virtual function
     virtual Location* Emit(CodeGenerator *cg) { return NULL; }
     virtual int GetMemBytes() { return 0; }
+    virtual void AddLabelPrefix(const char *prefix) { /* Empty */ }
 };
 
 class VarDecl : public Decl
@@ -98,6 +99,7 @@ class FnDecl : public Decl
     List<VarDecl*> *formals;
     Type *returnType;
     Stmt *body;
+    std::string *label;
 
   public:
     FnDecl(Identifier *name, Type *returnType, List<VarDecl*> *formals);
@@ -109,6 +111,7 @@ class FnDecl : public Decl
 
     void BuildScope();
     Location* Emit(CodeGenerator *cg);
+    void AddLabelPrefix(const char *prefix);
 };
 
 #endif

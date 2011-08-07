@@ -45,8 +45,15 @@ void ClassDecl::BuildScope() {
 }
 
 Location* ClassDecl::Emit(CodeGenerator *cg) {
-    for (int i = 0, n = members->NumElements(); i < n; ++i)
-        members->Nth(i)->Emit(cg);
+    for (int i = 0, n = members->NumElements(); i < n; ++i) {
+        std::string prefix;
+        prefix += GetName();
+        prefix += ".";
+
+        Decl *d = members->Nth(i);
+        d->AddLabelPrefix(prefix.c_str());
+        d->Emit(cg);
+    }
 
     cg->GenVTable(GetName(), GetMethodLabels());
 
@@ -106,6 +113,7 @@ FnDecl::FnDecl(Identifier *n, Type *r, List<VarDecl*> *d) : Decl(n) {
     (returnType=r)->SetParent(this);
     (formals=d)->SetParentAll(this);
     body = NULL;
+    label = new std::string(GetName());
 }
 
 void FnDecl::SetFunctionBody(Stmt *b) {
@@ -113,7 +121,7 @@ void FnDecl::SetFunctionBody(Stmt *b) {
 }
 
 const char* FnDecl::GetLabel() {
-    return GetName();
+    return label->c_str();
 }
 
 bool FnDecl::HasReturnVal() {
@@ -140,11 +148,15 @@ Location* FnDecl::Emit(CodeGenerator *cg) {
     }
 
     if (body != NULL) {
-        cg->GenLabel(GetName());
+        cg->GenLabel(GetLabel());
         cg->GenBeginFunc()->SetFrameSize(body->GetMemBytes());
         body->Emit(cg);
         cg->GenEndFunc();
     }
 
     return NULL;
+}
+
+void FnDecl::AddLabelPrefix(const char *p) {
+    label->insert(0, p);
 }
