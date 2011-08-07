@@ -324,10 +324,8 @@ class NewExpr : public Expr
     NewExpr(yyltype loc, NamedType *clsType);
 
     Type* GetType();
-
-    // TODO: Add Implemenation
-    Location* Emit(CodeGenerator *cg) { return NULL; }
-    int GetMemBytes() { return 0; }
+    Location* Emit(CodeGenerator *cg);
+    int GetMemBytes();
 };
 
 class NewArrayExpr : public Expr

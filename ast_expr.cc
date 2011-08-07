@@ -630,6 +630,25 @@ Type* NewExpr::GetType() {
     return c->GetType();
 }
 
+Location* NewExpr::Emit(CodeGenerator *cg) {
+    const char *name = cType->GetName();
+
+    Decl *d = Program::gScope->table->Lookup(name);
+    Assert(d != NULL);
+
+    Location *s = cg->GenLoadConstant(d->GetMemBytes());
+    Location *c = cg->GenLoadConstant(CodeGenerator::VarSize);
+
+    Location *mem = cg->GenBuiltInCall(Alloc, cg->GenBinaryOp("+", c, s));
+    cg->GenStore(mem, cg->GenLoadLabel(name));
+
+    return mem;
+}
+
+int NewExpr::GetMemBytes() {
+    return 5 * CodeGenerator::VarSize;
+}
+
 NewArrayExpr::NewArrayExpr(yyltype loc, Expr *sz, Type *et) : Expr(loc) {
     Assert(sz != NULL && et != NULL);
     (size=sz)->SetParent(this);

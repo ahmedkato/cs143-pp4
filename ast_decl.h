@@ -74,6 +74,11 @@ class ClassDecl : public Decl
     NamedType* GetExtends() { return extends; }
 
     void BuildScope();
+    Location* Emit(CodeGenerator *cg);
+    int GetMemBytes();
+
+  private:
+    List<const char*>* GetMethodLabels();
 };
 
 class InterfaceDecl : public Decl

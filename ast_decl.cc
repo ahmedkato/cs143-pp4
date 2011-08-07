@@ -44,6 +44,50 @@ void ClassDecl::BuildScope() {
         members->Nth(i)->BuildScope();
 }
 
+Location* ClassDecl::Emit(CodeGenerator *cg) {
+    for (int i = 0, n = members->NumElements(); i < n; ++i)
+        members->Nth(i)->Emit(cg);
+
+    cg->GenVTable(GetName(), GetMethodLabels());
+
+    return NULL;
+}
+
+int ClassDecl::GetMemBytes() {
+    int memBytes = 0;
+
+    if (extends != NULL) {
+        Decl *d = Program::gScope->table->Lookup(extends->GetName());
+        Assert(d != NULL);
+        memBytes += d->GetMemBytes();
+    }
+
+    for (int i = 0, n = members->NumElements(); i < n; ++i)
+        memBytes += members->Nth(i)->GetMemBytes();
+
+    return memBytes;
+}
+
+List<const char*>* ClassDecl::GetMethodLabels() {
+    Hashtable<FnDecl*> *labels = new Hashtable<FnDecl*>;
+    for (int i = 0, n = members->NumElements(); i < n; ++i) {
+        FnDecl *d = dynamic_cast<FnDecl*>(members->Nth(i));
+        if (d == NULL)
+            continue;
+        labels->Enter(d->GetLabel(), d);
+    }
+
+    // TODO: Merge this class's labels with inherited labels
+
+    Iterator<FnDecl*> iter = labels->GetIterator();
+    List<const char*> *list = new List<const char*>;
+    FnDecl *d;
+    while ((d = iter.GetNextValue()) != NULL)
+        list->Append(d->GetLabel());
+
+    return list;
+}
+
 InterfaceDecl::InterfaceDecl(Identifier *n, List<Decl*> *m) : Decl(n) {
     Assert(n != NULL && m != NULL);
     (members=m)->SetParentAll(this);
