@@ -595,16 +595,17 @@ Type* NewArrayExpr::GetType() {
 
 Location* NewArrayExpr::Emit(CodeGenerator *cg) {
     Location *s = size->Emit(cg);
-    Location *n = cg->GenLoadConstant(CodeGenerator::VarSize);
+    Location *c = cg->GenLoadConstant(CodeGenerator::VarSize);
 
-    Location *mem = cg->GenBuiltInCall(Alloc, cg->GenBinaryOp("+", s, n));
+    Location *n = cg->GenBinaryOp("*", s, c);
+    Location *mem = cg->GenBuiltInCall(Alloc, cg->GenBinaryOp("+", c, n));
     cg->GenStore(mem, s);
 
     return mem;
 }
 
 int NewArrayExpr::GetMemBytes() {
-    return size->GetMemBytes() + 3 * CodeGenerator::VarSize;
+    return size->GetMemBytes() + 4 * CodeGenerator::VarSize;
 }
 
 Type* ReadIntegerExpr::GetType() {
