@@ -257,10 +257,11 @@ class ArrayAccess : public LValue
     ArrayAccess(yyltype loc, Expr *base, Expr *subscript);
 
     Type* GetType();
+    Location* Emit(CodeGenerator *cg);
+    int GetMemBytes();
 
-    // TODO: Add Implemenation
-    Location* Emit(CodeGenerator *cg) { return NULL; }
-    int GetMemBytes() { return 0; }
+    Location* EmitAddr(CodeGenerator *cg);
+    int GetMemBytesAddr();
 };
 
 /* Note that field access is used both for qualified names

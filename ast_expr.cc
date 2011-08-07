@@ -419,14 +419,33 @@ Type* AssignExpr::GetType() {
 }
 
 Location* AssignExpr::Emit(CodeGenerator *cg) {
-    Location *ltemp = left->Emit(cg);
     Location *rtemp = right->Emit(cg);
-    cg->GenAssign(ltemp, rtemp);
-    return ltemp;
+    ArrayAccess *arr = dynamic_cast<ArrayAccess*>(left);
+
+    if (arr != NULL) {
+        Location *ltemp = arr->EmitAddr(cg);
+        cg->GenStore(ltemp, rtemp);
+        return cg->GenLoad(ltemp);
+    } else {
+        Location *ltemp = left->Emit(cg);
+        cg->GenAssign(ltemp, rtemp);
+        return ltemp;
+    }
 }
 
 int AssignExpr::GetMemBytes() {
-    return left->GetMemBytes() + right->GetMemBytes();
+    int memBytes = 0;
+    memBytes += right->GetMemBytes();
+    ArrayAccess *arr = dynamic_cast<ArrayAccess*>(left);
+
+    if (arr != NULL) {
+        memBytes += arr->GetMemBytesAddr();
+        memBytes += CodeGenerator::VarSize;
+        return memBytes;
+    } else {
+        memBytes += left->GetMemBytes();
+        return memBytes;
+    }
 }
 
 Type* This::GetType() {
@@ -443,6 +462,34 @@ ArrayAccess::ArrayAccess(yyltype loc, Expr *b, Expr *s) : LValue(loc) {
 
 Type* ArrayAccess::GetType() {
     return base->GetType();
+}
+
+Location* ArrayAccess::Emit(CodeGenerator *cg) {
+    return cg->GenLoad(EmitAddr(cg));
+}
+
+int ArrayAccess::GetMemBytes() {
+    return GetMemBytesAddr() + CodeGenerator::VarSize;
+}
+
+Location* ArrayAccess::EmitAddr(CodeGenerator *cg) {
+    Location *b = base->Emit(cg);
+    Location *s = subscript->Emit(cg);
+
+    Location *con = cg->GenLoadConstant(CodeGenerator::VarSize);
+
+    // Offset in bytes without skipping the array header info
+    Location *num = cg->GenBinaryOp("*", s, con);
+
+    // Offset in bytes taking the array header info into account
+    Location *off = cg->GenBinaryOp("+", num, con);
+
+    return cg->GenBinaryOp("+", b, off);
+}
+
+int ArrayAccess::GetMemBytesAddr() {
+    return base->GetMemBytes() + subscript->GetMemBytes() +
+           4 * CodeGenerator::VarSize;
 }
 
 FieldAccess::FieldAccess(Expr *b, Identifier *f)
