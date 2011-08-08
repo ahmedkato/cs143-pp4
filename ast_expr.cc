@@ -440,8 +440,7 @@ int AssignExpr::GetMemBytes() {
 
 Type* This::GetType() {
     ClassDecl *d = GetClassDecl();
-    if (d == NULL)
-        return NULL;
+    Assert(d != NULL);
     return d->GetType();
 }
 
@@ -502,8 +501,7 @@ FieldAccess::FieldAccess(Expr *b, Identifier *f)
 
 Type* FieldAccess::GetType() {
     VarDecl *d = GetDecl();
-    if (d == NULL)
-        return NULL;
+    Assert(d != NULL);
     return d->GetType();
 }
 
@@ -566,8 +564,7 @@ Type* Call::GetType() {
         return Type::intType;
 
     FnDecl *d = GetDecl();
-    if (d == NULL)
-        return NULL;
+    Assert(d != NULL);
     return d->GetType();
 }
 
@@ -659,8 +656,7 @@ NewExpr::NewExpr(yyltype loc, NamedType *c) : Expr(loc) {
 Type* NewExpr::GetType() {
     Decl *d = Program::gScope->table->Lookup(cType->GetName());
     ClassDecl *c = dynamic_cast<ClassDecl*>(d);
-    if (c == NULL)
-        return NULL;
+    Assert(c != NULL);
     return c->GetType();
 }
 
