@@ -444,6 +444,14 @@ Type* This::GetType() {
     return d->GetType();
 }
 
+Location* This::Emit(CodeGenerator *cg) {
+    return new Location(fpRelative, CodeGenerator::OffsetToFirstParam, "this");
+}
+
+int This::GetMemBytes() {
+    return 0;
+}
+
 ArrayAccess::ArrayAccess(yyltype loc, Expr *b, Expr *s) : LValue(loc) {
     (base=b)->SetParent(this);
     (subscript=s)->SetParent(this);

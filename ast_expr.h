@@ -245,10 +245,8 @@ class This : public Expr
     This(yyltype loc) : Expr(loc) {}
 
     Type* GetType();
-
-    // TODO: Add Implemenation
-    Location* Emit(CodeGenerator *cg) { return NULL; }
-    int GetMemBytes() { return 0; }
+    Location* Emit(CodeGenerator *cg);
+    int GetMemBytes();
 };
 
 class ArrayAccess : public LValue
@@ -266,7 +264,7 @@ class ArrayAccess : public LValue
     Location* EmitStore(CodeGenerator *cg, Location *val);
     int GetMemBytesStore();
 
-private:
+  private:
     Location* EmitAddr(CodeGenerator *cg);
     int GetMemBytesAddr();
 };
