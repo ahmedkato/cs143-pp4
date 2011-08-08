@@ -234,6 +234,9 @@ class LValue : public Expr
     virtual Type* GetType() = 0;
     virtual Location* Emit(CodeGenerator *cg) = 0;
     virtual int GetMemBytes() = 0;
+
+    virtual Location* EmitStore(CodeGenerator *cg, Location *val) = 0;
+    virtual int GetMemBytesStore() = 0;
 };
 
 class This : public Expr
@@ -260,6 +263,10 @@ class ArrayAccess : public LValue
     Location* Emit(CodeGenerator *cg);
     int GetMemBytes();
 
+    Location* EmitStore(CodeGenerator *cg, Location *val);
+    int GetMemBytesStore();
+
+private:
     Location* EmitAddr(CodeGenerator *cg);
     int GetMemBytesAddr();
 };
@@ -281,6 +288,9 @@ class FieldAccess : public LValue
     Type* GetType();
     Location* Emit(CodeGenerator *cg);
     int GetMemBytes();
+
+    Location* EmitStore(CodeGenerator *cg, Location *val);
+    int GetMemBytesStore();
 
   private:
     VarDecl* GetDecl();

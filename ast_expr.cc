@@ -420,32 +420,22 @@ Type* AssignExpr::GetType() {
 
 Location* AssignExpr::Emit(CodeGenerator *cg) {
     Location *rtemp = right->Emit(cg);
-    ArrayAccess *arr = dynamic_cast<ArrayAccess*>(left);
+    LValue *lval = dynamic_cast<LValue*>(left);
 
-    if (arr != NULL) {
-        Location *ltemp = arr->EmitAddr(cg);
-        cg->GenStore(ltemp, rtemp);
-        return cg->GenLoad(ltemp);
-    } else {
-        Location *ltemp = left->Emit(cg);
-        cg->GenAssign(ltemp, rtemp);
-        return ltemp;
-    }
+    if (lval != NULL)
+        return lval->EmitStore(cg, rtemp);
+
+    Location *ltemp = left->Emit(cg);
+    cg->GenAssign(ltemp, rtemp);
+    return ltemp;
 }
 
 int AssignExpr::GetMemBytes() {
-    int memBytes = 0;
-    memBytes += right->GetMemBytes();
-    ArrayAccess *arr = dynamic_cast<ArrayAccess*>(left);
+    LValue *lval = dynamic_cast<LValue*>(left);
+    if (lval != NULL)
+        return right->GetMemBytes() + lval->GetMemBytesStore();
 
-    if (arr != NULL) {
-        memBytes += arr->GetMemBytesAddr();
-        memBytes += CodeGenerator::VarSize;
-        return memBytes;
-    } else {
-        memBytes += left->GetMemBytes();
-        return memBytes;
-    }
+    return right->GetMemBytes() + left->GetMemBytes();
 }
 
 Type* This::GetType() {
@@ -469,6 +459,16 @@ Location* ArrayAccess::Emit(CodeGenerator *cg) {
 }
 
 int ArrayAccess::GetMemBytes() {
+    return GetMemBytesAddr() + CodeGenerator::VarSize;
+}
+
+Location* ArrayAccess::EmitStore(CodeGenerator *cg, Location *val) {
+    Location *addr = EmitAddr(cg);
+    cg->GenStore(addr, val);
+    return cg->GenLoad(addr);
+}
+
+int ArrayAccess::GetMemBytesStore() {
     return GetMemBytesAddr() + CodeGenerator::VarSize;
 }
 
@@ -508,14 +508,42 @@ Type* FieldAccess::GetType() {
 }
 
 Location* FieldAccess::Emit(CodeGenerator *cg) {
-    VarDecl *d = GetDecl();
-    if (d == NULL)
-        return NULL;
-
-    return d->GetMemLoc();
+    FieldAccess *b = dynamic_cast<FieldAccess*>(base);
+    if (b == NULL) {
+        VarDecl *d = GetDecl();
+        Assert(d != NULL);
+        return d->GetMemLoc();
+    } else {
+        VarDecl *d = b->GetDecl();
+        Assert(d != NULL);
+        int fieldOffset = 4; // TODO: Calculate actual field offset
+        return cg->GenLoad(d->GetMemLoc(), fieldOffset);
+    }
 }
 
 int FieldAccess::GetMemBytes() {
+    return 0;
+}
+
+Location* FieldAccess::EmitStore(CodeGenerator *cg, Location *val) {
+    FieldAccess *b = dynamic_cast<FieldAccess*>(base);
+    if (b == NULL) {
+        VarDecl *d = GetDecl();
+        Assert(d != NULL);
+        Location *ltemp = d->GetMemLoc();
+        cg->GenAssign(ltemp, val);
+        return ltemp;
+    } else {
+        VarDecl *d = b->GetDecl();
+        Assert(d != NULL);
+        int fieldOffset = 4; // TODO: Calculate actual field offset
+        Location *ltemp = d->GetMemLoc();
+        cg->GenStore(ltemp, val, fieldOffset);
+        return ltemp;
+    }
+}
+
+int FieldAccess::GetMemBytesStore() {
     return 0;
 }
 
@@ -558,9 +586,6 @@ int Call::GetMemBytes() {
 }
 
 Location* Call::EmitLabel(CodeGenerator *cg) {
-    if (base != NULL) // TODO: Add support for base != NULL
-        return NULL;
-
     List<Location*> *params = new List<Location*>;
     for (int i = 0, n = actuals->NumElements(); i < n; ++i)
         params->Append(actuals->Nth(i)->Emit(cg));
@@ -569,7 +594,16 @@ Location* Call::EmitLabel(CodeGenerator *cg) {
     for (int i = n-1; i >= 0; --i)
         cg->GenPushParam(params->Nth(i));
 
-    Location *ret = cg->GenLCall(field->GetName(), GetDecl()->HasReturnVal());
+    Location *ret;
+    if (base == NULL) {
+        ret = cg->GenLCall(field->GetName(), GetDecl()->HasReturnVal());
+    } else {
+        Location *b = base->Emit(cg);
+        Location *vtable = cg->GenLoad(b);
+        int methodOffset = 0; // TODO: Calculate actual method offset
+        Location *faddr = cg->GenLoad(vtable, methodOffset);
+        ret = cg->GenACall(faddr, GetDecl()->HasReturnVal());
+    }
 
     // TODO: Support variable Object sizes
     cg->GenPopParams(n * CodeGenerator::VarSize);
@@ -578,12 +612,12 @@ Location* Call::EmitLabel(CodeGenerator *cg) {
 }
 
 int Call::GetMemBytesLabel() {
-    if (base != NULL) // TODO: Add support for base != NULL
-        return 0;
-
     int memBytes = 0;
     for (int i = 0, n = actuals->NumElements(); i < n; ++i)
         memBytes += actuals->Nth(i)->GetMemBytes();
+
+    if (base != NULL)
+        memBytes += base->GetMemBytes() + 2 * CodeGenerator::VarSize;
 
     if (GetDecl()->HasReturnVal())
         memBytes += CodeGenerator::VarSize;
