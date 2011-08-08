@@ -515,7 +515,7 @@ Location* FieldAccess::Emit(CodeGenerator *cg) {
 
     VarDecl *baseDecl = baseAccess->GetDecl();
     Assert(baseDecl != NULL);
-    int fieldOffset = fieldDecl->GetMemOffset(); // TODO: Calculate actual field offset
+    int fieldOffset = fieldDecl->GetMemOffset();
     return cg->GenLoad(baseDecl->GetMemLoc(), fieldOffset);
 }
 
@@ -536,7 +536,7 @@ Location* FieldAccess::EmitStore(CodeGenerator *cg, Location *val) {
 
     VarDecl *baseDecl = baseAccess->GetDecl();
     Assert(baseDecl != NULL);
-    int fieldOffset = fieldDecl->GetMemOffset(); // TODO: Calculate actual field offset
+    int fieldOffset = fieldDecl->GetMemOffset();
     Location *ltemp = baseDecl->GetMemLoc();
     cg->GenStore(ltemp, val, fieldOffset);
     return ltemp;
@@ -598,7 +598,7 @@ Location* Call::EmitLabel(CodeGenerator *cg) {
     } else {
         Location *b = base->Emit(cg);
         Location *vtable = cg->GenLoad(b);
-        int methodOffset = 0; // TODO: Calculate actual method offset
+        int methodOffset = GetDecl()->GetVTblOffset();
         Location *faddr = cg->GenLoad(vtable, methodOffset);
         ret = cg->GenACall(faddr, GetDecl()->HasReturnVal());
     }

@@ -42,6 +42,7 @@ class CodeGenerator {
     static const int OffsetToFirstLocal = -8,
                      OffsetToFirstParam = 4,
                      OffsetToFirstField = 4,
+                     OffsetToFirstMethod = 0,
                      OffsetToFirstGlobal = 0;
     static const int VarSize = 4;
 

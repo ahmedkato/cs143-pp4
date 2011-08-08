@@ -38,6 +38,7 @@ class Decl : public Node
     // TODO: Make into a pure virtual function
     virtual Location* Emit(CodeGenerator *cg) { return NULL; }
     virtual int GetMemBytes() { return 0; }
+    virtual int GetVTblBytes() { return 0; }
     virtual void AddLabelPrefix(const char *prefix) { /* Empty */ }
 };
 
@@ -81,6 +82,7 @@ class ClassDecl : public Decl
     void BuildScope();
     Location* Emit(CodeGenerator *cg);
     int GetMemBytes();
+    int GetVTblBytes();
 
   private:
     List<const char*>* GetMethodLabels();
@@ -104,6 +106,7 @@ class FnDecl : public Decl
     Type *returnType;
     Stmt *body;
     std::string *label;
+    int vtblOffset;
 
   public:
     FnDecl(Identifier *name, Type *returnType, List<VarDecl*> *formals);
@@ -115,7 +118,11 @@ class FnDecl : public Decl
 
     void BuildScope();
     Location* Emit(CodeGenerator *cg);
+    int GetVTblBytes();
     void AddLabelPrefix(const char *prefix);
+
+    int GetVTblOffset() { return vtblOffset; }
+    void SetVTblOffset(int v) { vtblOffset = v; }
 };
 
 #endif

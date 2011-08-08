@@ -46,10 +46,13 @@ void ClassDecl::BuildScope() {
 
 Location* ClassDecl::Emit(CodeGenerator *cg) {
     int memOffset = CodeGenerator::OffsetToFirstField;
+    int vtblOffset = CodeGenerator::OffsetToFirstMethod;
+
     if (extends != NULL) {
         Decl *d = Program::gScope->table->Lookup(extends->GetName());
         Assert(d != NULL);
         memOffset += d->GetMemBytes();
+        vtblOffset += d->GetVTblBytes();
     }
 
     for (int i = 0, n = members->NumElements(); i < n; ++i) {
@@ -59,6 +62,14 @@ Location* ClassDecl::Emit(CodeGenerator *cg) {
         d->SetMemOffset(memOffset);
         memOffset += d->GetMemBytes();
 
+    }
+
+    for (int i = 0, n = members->NumElements(); i < n; ++i) {
+        FnDecl *d = dynamic_cast<FnDecl*>(members->Nth(i));
+        if (d == NULL)
+            continue;
+        d->SetVTblOffset(vtblOffset);
+        vtblOffset += CodeGenerator::VarSize;
     }
 
     for (int i = 0, n = members->NumElements(); i < n; ++i) {
@@ -89,6 +100,21 @@ int ClassDecl::GetMemBytes() {
         memBytes += members->Nth(i)->GetMemBytes();
 
     return memBytes;
+}
+
+int ClassDecl::GetVTblBytes() {
+    int vtblBytes = 0;
+
+    if (extends != NULL) {
+        Decl *d = Program::gScope->table->Lookup(extends->GetName());
+        Assert(d != NULL);
+        vtblBytes += d->GetVTblBytes();
+    }
+
+    for (int i = 0, n = members->NumElements(); i < n; ++i)
+        vtblBytes += members->Nth(i)->GetVTblBytes();
+
+    return vtblBytes;
 }
 
 List<const char*>* ClassDecl::GetMethodLabels() {
@@ -171,6 +197,10 @@ Location* FnDecl::Emit(CodeGenerator *cg) {
     }
 
     return NULL;
+}
+
+int FnDecl::GetVTblBytes() {
+    return CodeGenerator::VarSize;
 }
 
 void FnDecl::AddLabelPrefix(const char *p) {
