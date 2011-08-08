@@ -10,15 +10,17 @@
 #include "codegen.h"
 
 Decl* Expr::GetFieldDecl(Identifier *field, Expr *b) {
-    ClassDecl *classDecl = GetClassDecl();
 
-    Decl *d;
     if (b != NULL)
-        d = GetFieldDecl(field, b->GetType());
-    else if (classDecl != NULL)
-        d = GetFieldDecl(field, static_cast<Node*>(classDecl));
-    else
-        d = GetFieldDecl(field, static_cast<Node*>(this));
+        return GetFieldDecl(field, b->GetType());
+
+    Decl *d = GetFieldDecl(field, static_cast<Node*>(this));
+
+    if (d == NULL) {
+        ClassDecl *classDecl = GetClassDecl();
+        if (classDecl != NULL)
+            d = GetFieldDecl(field, static_cast<Node*>(classDecl));
+    }
 
     return d;
 }
