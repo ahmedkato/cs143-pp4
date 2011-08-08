@@ -506,17 +506,17 @@ Type* FieldAccess::GetType() {
 }
 
 Location* FieldAccess::Emit(CodeGenerator *cg) {
-    FieldAccess *b = dynamic_cast<FieldAccess*>(base);
-    if (b == NULL) {
-        VarDecl *d = GetDecl();
-        Assert(d != NULL);
-        return d->GetMemLoc();
-    } else {
-        VarDecl *d = b->GetDecl();
-        Assert(d != NULL);
-        int fieldOffset = 4; // TODO: Calculate actual field offset
-        return cg->GenLoad(d->GetMemLoc(), fieldOffset);
-    }
+    FieldAccess *baseAccess = dynamic_cast<FieldAccess*>(base);
+    VarDecl *fieldDecl = GetDecl();
+    Assert(fieldDecl != NULL);
+
+    if (baseAccess == NULL)
+        return fieldDecl->GetMemLoc();
+
+    VarDecl *baseDecl = baseAccess->GetDecl();
+    Assert(baseDecl != NULL);
+    int fieldOffset = fieldDecl->GetMemOffset(); // TODO: Calculate actual field offset
+    return cg->GenLoad(baseDecl->GetMemLoc(), fieldOffset);
 }
 
 int FieldAccess::GetMemBytes() {
@@ -524,21 +524,22 @@ int FieldAccess::GetMemBytes() {
 }
 
 Location* FieldAccess::EmitStore(CodeGenerator *cg, Location *val) {
-    FieldAccess *b = dynamic_cast<FieldAccess*>(base);
-    if (b == NULL) {
-        VarDecl *d = GetDecl();
-        Assert(d != NULL);
-        Location *ltemp = d->GetMemLoc();
+    FieldAccess *baseAccess = dynamic_cast<FieldAccess*>(base);
+    VarDecl *fieldDecl = GetDecl();
+    Assert(fieldDecl != NULL);
+
+    if (baseAccess == NULL) {
+        Location *ltemp = fieldDecl->GetMemLoc();
         cg->GenAssign(ltemp, val);
         return ltemp;
-    } else {
-        VarDecl *d = b->GetDecl();
-        Assert(d != NULL);
-        int fieldOffset = 4; // TODO: Calculate actual field offset
-        Location *ltemp = d->GetMemLoc();
-        cg->GenStore(ltemp, val, fieldOffset);
-        return ltemp;
     }
+
+    VarDecl *baseDecl = baseAccess->GetDecl();
+    Assert(baseDecl != NULL);
+    int fieldOffset = fieldDecl->GetMemOffset(); // TODO: Calculate actual field offset
+    Location *ltemp = baseDecl->GetMemLoc();
+    cg->GenStore(ltemp, val, fieldOffset);
+    return ltemp;
 }
 
 int FieldAccess::GetMemBytesStore() {

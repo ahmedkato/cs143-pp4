@@ -46,6 +46,7 @@ class VarDecl : public Decl
   protected:
     Type *type;
     Location *memLoc;
+    int memOffset;
 
   public:
     VarDecl(Identifier *name, Type *type);
@@ -58,6 +59,9 @@ class VarDecl : public Decl
 
     Location* GetMemLoc() { return memLoc; }
     void SetMemLoc(Location *m) { memLoc = m; }
+
+    int GetMemOffset() { return memOffset; }
+    void SetMemOffset(int m) { memOffset = m; }
 };
 
 class ClassDecl : public Decl

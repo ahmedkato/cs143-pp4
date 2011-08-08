@@ -45,6 +45,22 @@ void ClassDecl::BuildScope() {
 }
 
 Location* ClassDecl::Emit(CodeGenerator *cg) {
+    int memOffset = CodeGenerator::OffsetToFirstField;
+    if (extends != NULL) {
+        Decl *d = Program::gScope->table->Lookup(extends->GetName());
+        Assert(d != NULL);
+        memOffset += d->GetMemBytes();
+    }
+
+    for (int i = 0, n = members->NumElements(); i < n; ++i) {
+        VarDecl *d = dynamic_cast<VarDecl*>(members->Nth(i));
+        if (d == NULL)
+            continue;
+        d->SetMemOffset(memOffset);
+        memOffset += d->GetMemBytes();
+
+    }
+
     for (int i = 0, n = members->NumElements(); i < n; ++i) {
         std::string prefix;
         prefix += GetName();

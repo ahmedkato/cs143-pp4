@@ -41,6 +41,7 @@ class CodeGenerator {
            // Conveniently, all vars are 4 bytes in size for code generation
     static const int OffsetToFirstLocal = -8,
                      OffsetToFirstParam = 4,
+                     OffsetToFirstField = 4,
                      OffsetToFirstGlobal = 0;
     static const int VarSize = 4;
 
