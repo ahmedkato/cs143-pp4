@@ -118,23 +118,29 @@ int ClassDecl::GetVTblBytes() {
 }
 
 List<const char*>* ClassDecl::GetMethodLabels() {
-    Hashtable<FnDecl*> *labels = new Hashtable<FnDecl*>;
+    /* TODO: Implement polymorphic behaviour. Currently, the base class's
+     * method will be called even if the object is actually of a derived type.
+     */
+
+    List<const char*> *labels = new List<const char*>;
+
+    if (extends != NULL) {
+        Decl *d = Program::gScope->table->Lookup(extends->GetName());
+        ClassDecl *c = dynamic_cast<ClassDecl*>(d);
+        Assert(d != NULL);
+        List<const char*> *extLabels = c->GetMethodLabels();
+        for (int i = 0, n = extLabels->NumElements(); i < n; ++i)
+            labels->Append(strdup(extLabels->Nth(i)));
+    }
+
     for (int i = 0, n = members->NumElements(); i < n; ++i) {
         FnDecl *d = dynamic_cast<FnDecl*>(members->Nth(i));
         if (d == NULL)
             continue;
-        labels->Enter(d->GetLabel(), d);
+        labels->Append(d->GetLabel());
     }
 
-    // TODO: Merge this class's labels with inherited labels
-
-    Iterator<FnDecl*> iter = labels->GetIterator();
-    List<const char*> *list = new List<const char*>;
-    FnDecl *d;
-    while ((d = iter.GetNextValue()) != NULL)
-        list->Append(d->GetLabel());
-
-    return list;
+    return labels;
 }
 
 InterfaceDecl::InterfaceDecl(Identifier *n, List<Decl*> *m) : Decl(n) {
