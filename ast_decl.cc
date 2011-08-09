@@ -83,7 +83,12 @@ Location* ClassDecl::Emit(CodeGenerator *cg) {
         d->Emit(cg);
     }
 
-    cg->GenVTable(GetName(), GetMethodLabels());
+    List<FnDecl*> *decls = GetMethodDecls();
+    List<const char*> *labels = new List<const char*>;
+    for (int i = 0, n = decls->NumElements(); i < n; ++i)
+        labels->Append(decls->Nth(i)->GetLabel());
+
+    cg->GenVTable(GetName(), labels);
 
     return NULL;
 }
@@ -118,30 +123,30 @@ int ClassDecl::GetVTblBytes() {
     return vtblBytes;
 }
 
-List<const char*>* ClassDecl::GetMethodLabels() {
+List<FnDecl*>* ClassDecl::GetMethodDecls() {
     /* TODO: Implement polymorphic behaviour. Currently, the base class's
      * method will be called even if the object is actually of a derived type.
      */
 
-    List<const char*> *labels = new List<const char*>;
+    List<FnDecl*> *decls = new List<FnDecl*>;
 
     if (extends != NULL) {
         Decl *d = Program::gScope->table->Lookup(extends->GetName());
         ClassDecl *c = dynamic_cast<ClassDecl*>(d);
-        Assert(d != NULL);
-        List<const char*> *extLabels = c->GetMethodLabels();
-        for (int i = 0, n = extLabels->NumElements(); i < n; ++i)
-            labels->Append(strdup(extLabels->Nth(i)));
+        Assert(c != NULL);
+        List<FnDecl*> *extDecls = c->GetMethodDecls();
+        for (int i = 0, n = extDecls->NumElements(); i < n; ++i)
+            decls->Append(extDecls->Nth(i));
     }
 
     for (int i = 0, n = members->NumElements(); i < n; ++i) {
         FnDecl *d = dynamic_cast<FnDecl*>(members->Nth(i));
         if (d == NULL)
             continue;
-        labels->Append(d->GetLabel());
+        decls->Append(d);
     }
 
-    return labels;
+    return decls;
 }
 
 InterfaceDecl::InterfaceDecl(Identifier *n, List<Decl*> *m) : Decl(n) {

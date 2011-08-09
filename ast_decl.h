@@ -21,6 +21,7 @@ class Identifier;
 class Stmt;
 class CodeGenerator;
 class Location;
+class FnDecl;
 
 class Decl : public Node
 {
@@ -85,7 +86,7 @@ class ClassDecl : public Decl
     int GetVTblBytes();
 
   private:
-    List<const char*>* GetMethodLabels();
+    List<FnDecl*>* GetMethodDecls();
 };
 
 class InterfaceDecl : public Decl
