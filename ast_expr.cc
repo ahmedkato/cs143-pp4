@@ -489,6 +489,8 @@ Location* ArrayAccess::EmitAddr(CodeGenerator *cg) {
     Location *b = base->Emit(cg);
     Location *s = subscript->Emit(cg);
 
+    EmitRuntimeSubscriptCheck(cg, b, s);
+
     Location *con = cg->GenLoadConstant(CodeGenerator::VarSize);
 
     // Offset in bytes without skipping the array header info
@@ -502,7 +504,33 @@ Location* ArrayAccess::EmitAddr(CodeGenerator *cg) {
 
 int ArrayAccess::GetMemBytesAddr() {
     return base->GetMemBytes() + subscript->GetMemBytes() +
-           4 * CodeGenerator::VarSize;
+           4 * CodeGenerator::VarSize + GetMemBytesRuntimeSubscriptCheck();
+}
+
+Location* ArrayAccess::EmitRuntimeSubscriptCheck(CodeGenerator *cg,
+                                                 Location *arr,
+                                                 Location *sub) {
+    const char *err = "Decaf runtime error: Array subscript out of bounds\n";
+    Location *zro = cg->GenLoadConstant(0);
+    Location *siz = cg->GenLoad(arr);
+
+    Location *lessZro = cg->GenBinaryOp("<", sub, zro);
+    Location *gratSiz = cg->GenBinaryOp("<", siz, sub);
+    Location *equlSiz = cg->GenBinaryOp("==", siz, sub);
+    Location *gratEqulSiz = cg->GenBinaryOp("||", gratSiz, equlSiz);
+    Location *gratEqulSizLessZro = cg->GenBinaryOp("||", gratEqulSiz, lessZro);
+
+    const char *passCheck = cg->NewLabel();
+    cg->GenIfZ(gratEqulSizLessZro, passCheck);
+    cg->GenBuiltInCall(PrintString, cg->GenLoadConstant(err));
+    cg->GenBuiltInCall(Halt);
+    cg->GenLabel(passCheck);
+
+    return NULL;
+}
+
+int ArrayAccess::GetMemBytesRuntimeSubscriptCheck() {
+    return 8 * CodeGenerator::VarSize;
 }
 
 FieldAccess::FieldAccess(Expr *b, Identifier *f)

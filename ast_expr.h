@@ -268,6 +268,10 @@ class ArrayAccess : public LValue
   private:
     Location* EmitAddr(CodeGenerator *cg);
     int GetMemBytesAddr();
+
+    Location* EmitRuntimeSubscriptCheck(CodeGenerator *cg, Location *siz,
+                                        Location *sub);
+    int GetMemBytesRuntimeSubscriptCheck();
 };
 
 /* Note that field access is used both for qualified names
