@@ -68,6 +68,7 @@ Location* ClassDecl::Emit(CodeGenerator *cg) {
         FnDecl *d = dynamic_cast<FnDecl*>(members->Nth(i));
         if (d == NULL)
             continue;
+        d->SetIsMethod(true);
         d->SetVTblOffset(vtblOffset);
         vtblOffset += CodeGenerator::VarSize;
     }
@@ -162,6 +163,7 @@ FnDecl::FnDecl(Identifier *n, Type *r, List<VarDecl*> *d) : Decl(n) {
     (formals=d)->SetParentAll(this);
     body = NULL;
     label = new std::string(GetName());
+    isMethod = false;
 }
 
 void FnDecl::SetFunctionBody(Stmt *b) {
@@ -188,6 +190,10 @@ void FnDecl::BuildScope() {
 
 Location* FnDecl::Emit(CodeGenerator *cg) {
     int offset = CodeGenerator::OffsetToFirstParam;
+
+    if (isMethod)
+        offset += CodeGenerator::VarSize;
+
     for (int i = 0, n = formals->NumElements(); i < n; ++i) {
         VarDecl *d = formals->Nth(i);
         Location *loc = new Location(fpRelative, offset, d->GetName());

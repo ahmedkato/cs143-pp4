@@ -107,6 +107,7 @@ class FnDecl : public Decl
     Stmt *body;
     std::string *label;
     int vtblOffset;
+    bool isMethod;
 
   public:
     FnDecl(Identifier *name, Type *returnType, List<VarDecl*> *formals);
@@ -123,6 +124,8 @@ class FnDecl : public Decl
 
     int GetVTblOffset() { return vtblOffset; }
     void SetVTblOffset(int v) { vtblOffset = v; }
+
+    void SetIsMethod(bool b) { isMethod = b; }
 };
 
 #endif
