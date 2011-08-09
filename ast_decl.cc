@@ -143,6 +143,19 @@ List<FnDecl*>* ClassDecl::GetMethodDecls() {
         FnDecl *d = dynamic_cast<FnDecl*>(members->Nth(i));
         if (d == NULL)
             continue;
+
+        for (int j = 0, m = decls->NumElements(); j < m; ++j) {
+            if (strcmp(decls->Nth(j)->GetName(), d->GetName()) == 0) {
+                decls->RemoveAt(j);
+                decls->InsertAt(d, j);
+            }
+        }
+    }
+
+    for (int i = 0, n = members->NumElements(); i < n; ++i) {
+        FnDecl *d = dynamic_cast<FnDecl*>(members->Nth(i));
+        if (d == NULL)
+            continue;
         decls->Append(d);
     }
 
