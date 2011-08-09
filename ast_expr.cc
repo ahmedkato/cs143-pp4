@@ -63,6 +63,10 @@ ClassDecl* Expr::GetClassDecl() {
     return NULL;
 }
 
+Location* Expr::GetThisLoc() {
+    return new Location(fpRelative, CodeGenerator::OffsetToFirstParam, "this");
+}
+
 IntConstant::IntConstant(yyltype loc, int val) : Expr(loc) {
     value = val;
 }
@@ -447,7 +451,7 @@ Type* This::GetType() {
 }
 
 Location* This::Emit(CodeGenerator *cg) {
-    return new Location(fpRelative, CodeGenerator::OffsetToFirstParam, "this");
+    return GetThisLoc();
 }
 
 int This::GetMemBytes() {
@@ -584,8 +588,7 @@ Location* FieldAccess::EmitMemLoc(CodeGenerator *cg, VarDecl *fieldDecl) {
     /* If loc == NULL, it is assumed that the base is implicitly or explicitly
      * the 'this' pointer.
      */
-    Location *This = new Location(fpRelative,
-                                  CodeGenerator::OffsetToFirstParam, "this");
+    Location *This = GetThisLoc();
     return cg->GenLoad(This, fieldDecl->GetMemOffset());
 }
 
@@ -637,14 +640,17 @@ Location* Call::EmitLabel(CodeGenerator *cg) {
         cg->GenPushParam(params->Nth(i));
 
     Location *ret;
-    if (base == NULL) {
+    if (!IsMethodCall()) {
         ret = cg->GenLCall(field->GetName(), GetDecl()->HasReturnVal());
     } else {
-        Location *b = base->Emit(cg);
-        Location *vtable = cg->GenLoad(b);
-        int methodOffset = GetDecl()->GetVTblOffset();
-        Location *faddr = cg->GenLoad(vtable, methodOffset);
-        ret = cg->GenACall(faddr, GetDecl()->HasReturnVal());
+        Location *b;
+        if (base != NULL)
+            b = base->Emit(cg);
+        else
+            b = GetThisLoc();
+
+        cg->GenPushParam(b);
+        ret = EmitDynamicDispatch(cg, b);
     }
 
     // TODO: Support variable Object sizes
@@ -658,8 +664,12 @@ int Call::GetMemBytesLabel() {
     for (int i = 0, n = actuals->NumElements(); i < n; ++i)
         memBytes += actuals->Nth(i)->GetMemBytes();
 
-    if (base != NULL)
-        memBytes += base->GetMemBytes() + 2 * CodeGenerator::VarSize;
+    if (IsMethodCall()) {
+        if (base != NULL)
+            memBytes += base->GetMemBytes();
+
+        memBytes += GetMemBytesDynamicDispatch();
+    }
 
     if (GetDecl()->HasReturnVal())
         memBytes += CodeGenerator::VarSize;
@@ -675,6 +685,17 @@ int Call::GetMemBytesArrayLength() {
     return base->GetMemBytes() + CodeGenerator::VarSize;
 }
 
+Location* Call::EmitDynamicDispatch(CodeGenerator *cg, Location *b) {
+    Location *vtable = cg->GenLoad(b);
+    int methodOffset = GetDecl()->GetVTblOffset();
+    Location *faddr = cg->GenLoad(vtable, methodOffset);
+    return cg->GenACall(faddr, GetDecl()->HasReturnVal());
+}
+
+int Call::GetMemBytesDynamicDispatch() {
+    return 2 * CodeGenerator::VarSize;
+}
+
 FnDecl* Call::GetDecl() {
     Decl *d = GetFieldDecl(field, base);
     return dynamic_cast<FnDecl*>(d);
@@ -688,6 +709,21 @@ bool Call::IsArrayLengthCall() {
         return false;
 
     if (strcmp("length", field->GetName()) != 0)
+        return false;
+
+    return true;
+}
+
+bool Call::IsMethodCall() {
+    if (base != NULL)
+        return true;
+
+    ClassDecl *c = GetClassDecl();
+    if (c == NULL)
+        return false;
+
+    FnDecl *f = dynamic_cast<FnDecl*>(GetFieldDecl(field, c->GetType()));
+    if (f == NULL)
         return false;
 
     return true;

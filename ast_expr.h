@@ -38,6 +38,7 @@ class Expr : public Stmt
     Decl* GetFieldDecl(Identifier *field, Node *n);
     Decl* GetFieldDecl(Identifier *field, Type *t);
     ClassDecl* GetClassDecl();
+    Location* GetThisLoc();
 };
 
 /* This node type is used for those places where an expression is optional.
@@ -322,8 +323,12 @@ class Call : public Expr
     Location* EmitArrayLength(CodeGenerator *cg);
     int GetMemBytesArrayLength();
 
+    Location* EmitDynamicDispatch(CodeGenerator *cg, Location *b);
+    int GetMemBytesDynamicDispatch();
+
     FnDecl* GetDecl();
     bool IsArrayLengthCall();
+    bool IsMethodCall();
 };
 
 class NewExpr : public Expr
