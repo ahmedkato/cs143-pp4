@@ -292,6 +292,9 @@ class FieldAccess : public LValue
 
   private:
     VarDecl* GetDecl();
+
+    Location* EmitMemLoc(CodeGenerator *cg, VarDecl *fieldDecl);
+    int GetMemBytesMemLoc(VarDecl *fieldDecl);
 };
 
 /* Like field access, call is used both for qualified base.field()

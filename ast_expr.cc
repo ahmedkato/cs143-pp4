@@ -521,7 +521,7 @@ Location* FieldAccess::Emit(CodeGenerator *cg) {
     Assert(fieldDecl != NULL);
 
     if (baseAccess == NULL)
-        return fieldDecl->GetMemLoc();
+        return EmitMemLoc(cg, fieldDecl);
 
     VarDecl *baseDecl = baseAccess->GetDecl();
     Assert(baseDecl != NULL);
@@ -530,7 +530,14 @@ Location* FieldAccess::Emit(CodeGenerator *cg) {
 }
 
 int FieldAccess::GetMemBytes() {
-    return 0;
+    FieldAccess *baseAccess = dynamic_cast<FieldAccess*>(base);
+    VarDecl *fieldDecl = GetDecl();
+    Assert(fieldDecl != NULL);
+
+    if (baseAccess == NULL)
+        return GetMemBytesMemLoc(fieldDecl);
+
+    return CodeGenerator::VarSize;
 }
 
 Location* FieldAccess::EmitStore(CodeGenerator *cg, Location *val) {
@@ -539,7 +546,7 @@ Location* FieldAccess::EmitStore(CodeGenerator *cg, Location *val) {
     Assert(fieldDecl != NULL);
 
     if (baseAccess == NULL) {
-        Location *ltemp = fieldDecl->GetMemLoc();
+        Location *ltemp = EmitMemLoc(cg, fieldDecl);
         cg->GenAssign(ltemp, val);
         return ltemp;
     }
@@ -553,6 +560,13 @@ Location* FieldAccess::EmitStore(CodeGenerator *cg, Location *val) {
 }
 
 int FieldAccess::GetMemBytesStore() {
+    FieldAccess *baseAccess = dynamic_cast<FieldAccess*>(base);
+    VarDecl *fieldDecl = GetDecl();
+    Assert(fieldDecl != NULL);
+
+    if (baseAccess == NULL)
+        return GetMemBytesMemLoc(fieldDecl);
+
     return 0;
 }
 
@@ -560,6 +574,26 @@ VarDecl* FieldAccess::GetDecl() {
     Decl *d = GetFieldDecl(field, base);
     return dynamic_cast<VarDecl*>(d);
 
+}
+
+Location* FieldAccess::EmitMemLoc(CodeGenerator *cg, VarDecl *fieldDecl) {
+    Location *loc = fieldDecl->GetMemLoc();
+    if (loc != NULL)
+        return loc;
+
+    /* If loc == NULL, it is assumed that the base is implicitly or explicitly
+     * the 'this' pointer.
+     */
+    Location *This = new Location(fpRelative,
+                                  CodeGenerator::OffsetToFirstParam, "this");
+    return cg->GenLoad(This, fieldDecl->GetMemOffset());
+}
+
+int FieldAccess::GetMemBytesMemLoc(VarDecl *fieldDecl) {
+    Location *loc = fieldDecl->GetMemLoc();
+    if (loc != NULL)
+        return 0;
+    return CodeGenerator::VarSize;
 }
 
 Call::Call(yyltype loc, Expr *b, Identifier *f, List<Expr*> *a) : Expr(loc)  {
