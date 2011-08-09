@@ -41,7 +41,7 @@ Decl* Expr::GetFieldDecl(Identifier *field, Type *t) {
 
     while (t != NULL) {
         Decl *tDecl = Program::gScope->table->Lookup(t->GetName());
-        Decl *d = GetFieldDecl(field, tDecl);
+        Decl *d = tDecl->GetScope()->table->Lookup(field->GetName());
         if (d != NULL)
             return d;
 
