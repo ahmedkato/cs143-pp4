@@ -550,9 +550,7 @@ Location* FieldAccess::EmitStore(CodeGenerator *cg, Location *val) {
     Assert(fieldDecl != NULL);
 
     if (baseAccess == NULL) {
-        Location *ltemp = EmitMemLoc(cg, fieldDecl);
-        cg->GenAssign(ltemp, val);
-        return ltemp;
+        return EmitMemLocStore(cg, val, fieldDecl);
     }
 
     VarDecl *baseDecl = baseAccess->GetDecl();
@@ -569,7 +567,7 @@ int FieldAccess::GetMemBytesStore() {
     Assert(fieldDecl != NULL);
 
     if (baseAccess == NULL)
-        return GetMemBytesMemLoc(fieldDecl);
+        return GetMemBytesMemLocStore(fieldDecl);
 
     return 0;
 }
@@ -597,6 +595,26 @@ int FieldAccess::GetMemBytesMemLoc(VarDecl *fieldDecl) {
     if (loc != NULL)
         return 0;
     return CodeGenerator::VarSize;
+}
+
+Location* FieldAccess::EmitMemLocStore(CodeGenerator *cg, Location *val,
+                                       VarDecl *fieldDecl) {
+    Location *loc = fieldDecl->GetMemLoc();
+    if (loc != NULL) {
+        cg->GenAssign(loc, val);
+        return loc;
+    }
+
+    /* If loc == NULL, it is assumed that the base is implicitly or explicitly
+     * the 'this' pointer.
+     */
+    Location *This = GetThisLoc();
+    cg->GenStore(This, val, fieldDecl->GetMemOffset());
+    return This;
+}
+
+int FieldAccess::GetMemBytesMemLocStore(VarDecl *fieldDecl) {
+    return 0;
 }
 
 Call::Call(yyltype loc, Expr *b, Identifier *f, List<Expr*> *a) : Expr(loc)  {
