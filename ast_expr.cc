@@ -310,7 +310,10 @@ Location* EqualityExpr::EmitEqual(CodeGenerator *cg) {
     Location *ltmp = left->Emit(cg);
     Location *rtmp = right->Emit(cg);
 
-    return cg->GenBinaryOp("==", ltmp, rtmp);
+    if (left->GetType()->IsEquivalentTo(Type::stringType))
+        return cg->GenBuiltInCall(StringEqual, ltmp, rtmp);
+    else
+        return cg->GenBinaryOp("==", ltmp, rtmp);
 }
 
 int EqualityExpr::GetMemBytesEqual() {
@@ -325,7 +328,11 @@ Location* EqualityExpr::EmitNotEqual(CodeGenerator *cg) {
     Location *ltmp = left->Emit(cg);
     Location *rtmp = right->Emit(cg);
 
-    Location *equal = cg->GenBinaryOp("==", ltmp, rtmp);
+    Location *equal;
+    if (left->GetType()->IsEquivalentTo(Type::stringType))
+        equal = cg->GenBuiltInCall(StringEqual, ltmp, rtmp);
+    else
+        equal = cg->GenBinaryOp("==", ltmp, rtmp);
 
     cg->GenIfZ(equal, ret_one);
     cg->GenAssign(ret, cg->GenLoadConstant(0));
