@@ -37,6 +37,7 @@ class Decl : public Node
     virtual void BuildScope() = 0;
 
     // TODO: Make into a pure virtual function
+    virtual void PreEmit() { /* Empty */ }
     virtual Location* Emit(CodeGenerator *cg) { return NULL; }
     virtual int GetMemBytes() { return 0; }
     virtual int GetVTblBytes() { return 0; }
@@ -81,6 +82,7 @@ class ClassDecl : public Decl
     NamedType* GetExtends() { return extends; }
 
     void BuildScope();
+    void PreEmit();
     Location* Emit(CodeGenerator *cg);
     int GetMemBytes();
     int GetVTblBytes();

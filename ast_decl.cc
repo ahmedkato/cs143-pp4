@@ -30,6 +30,7 @@ ClassDecl::ClassDecl(Identifier *n, NamedType *ex, List<NamedType*> *imp, List<D
     if (extends) extends->SetParent(this);
     (implements=imp)->SetParentAll(this);
     (members=m)->SetParentAll(this);
+
 }
 
 NamedType* ClassDecl::GetType() {
@@ -44,7 +45,7 @@ void ClassDecl::BuildScope() {
         members->Nth(i)->BuildScope();
 }
 
-Location* ClassDecl::Emit(CodeGenerator *cg) {
+void ClassDecl::PreEmit() {
     int memOffset = CodeGenerator::OffsetToFirstField;
     int vtblOffset = CodeGenerator::OffsetToFirstMethod;
 
@@ -77,11 +78,13 @@ Location* ClassDecl::Emit(CodeGenerator *cg) {
         std::string prefix;
         prefix += GetName();
         prefix += ".";
-
-        Decl *d = members->Nth(i);
-        d->AddLabelPrefix(prefix.c_str());
-        d->Emit(cg);
+        members->Nth(i)->AddLabelPrefix(prefix.c_str());
     }
+}
+
+Location* ClassDecl::Emit(CodeGenerator *cg) {
+    for (int i = 0, n = members->NumElements(); i < n; ++i)
+        members->Nth(i)->Emit(cg);
 
     List<FnDecl*> *decls = GetMethodDecls();
     List<const char*> *labels = new List<const char*>;

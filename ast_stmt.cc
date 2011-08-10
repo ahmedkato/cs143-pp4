@@ -76,6 +76,9 @@ void Program::Emit() {
     }
 
     for (int i = 0, n = decls->NumElements(); i < n; ++i)
+        decls->Nth(i)->PreEmit();
+
+    for (int i = 0, n = decls->NumElements(); i < n; ++i)
         decls->Nth(i)->Emit(codeGenerator);
 
     codeGenerator->DoFinalCodeGen();
