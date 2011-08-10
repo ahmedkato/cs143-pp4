@@ -27,6 +27,7 @@ class CodeGenerator {
     List<Instruction*> *code;
 
     int localOffset;
+    bool mainDefined;
 
   public:
            // Here are some class constants to remind you of the offsets

@@ -9,11 +9,13 @@
 #include <string.h>
 #include "tac.h"
 #include "mips.h"
+#include "errors.h"
 
 CodeGenerator::CodeGenerator()
 {
   code = new List<Instruction*>();
   localOffset = OffsetToFirstLocal;
+  mainDefined = false;
 }
 
 char *CodeGenerator::NewLabel()
@@ -96,6 +98,9 @@ Location *CodeGenerator::GenBinaryOp(const char *opName, Location *op1,
 
 void CodeGenerator::GenLabel(const char *label)
 {
+  if (strcmp(label, "main") == 0)
+    mainDefined = true;
+
   code->Append(new Label(label));
 }
 
@@ -192,6 +197,9 @@ void CodeGenerator::GenVTable(const char *className, List<const char *> *methodL
 
 void CodeGenerator::DoFinalCodeGen()
 {
+  if (!mainDefined)
+    ReportError::NoMainFound();
+
   if (IsDebugOn("tac")) { // if debug don't translate to mips, just print Tac
     for (int i = 0; i < code->NumElements(); i++)
 	code->Nth(i)->Print();
