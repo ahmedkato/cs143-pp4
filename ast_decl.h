@@ -35,13 +35,11 @@ class Decl : public Node
     const char* GetName() { return id->GetName(); }
 
     virtual void BuildScope() = 0;
-
-    // TODO: Make into a pure virtual function
-    virtual void PreEmit() { /* Empty */ }
-    virtual Location* Emit(CodeGenerator *cg) { return NULL; }
-    virtual int GetMemBytes() { return 0; }
-    virtual int GetVTblBytes() { return 0; }
-    virtual void AddLabelPrefix(const char *prefix) { /* Empty */ }
+    virtual void PreEmit() = 0;
+    virtual Location* Emit(CodeGenerator *cg) = 0;
+    virtual int GetMemBytes() = 0;
+    virtual int GetVTblBytes() = 0;
+    virtual void AddLabelPrefix(const char *prefix) = 0;
 };
 
 class VarDecl : public Decl
@@ -57,8 +55,11 @@ class VarDecl : public Decl
     Type* GetType() { return type; }
 
     void BuildScope() { /* Empty */ }
-
+    void PreEmit() { /* Empty */ }
+    Location* Emit(CodeGenerator *cg) { return NULL; }
     int GetMemBytes();
+    int GetVTblBytes() { return 0; }
+    void AddLabelPrefix(const char *prefix) { /* Empty */ }
 
     Location* GetMemLoc() { return memLoc; }
     void SetMemLoc(Location *m) { memLoc = m; }
@@ -86,6 +87,7 @@ class ClassDecl : public Decl
     Location* Emit(CodeGenerator *cg);
     int GetMemBytes();
     int GetVTblBytes();
+    void AddLabelPrefix(const char *prefix) { /* Empty */ }
 
   private:
     List<FnDecl*>* GetMethodDecls();
@@ -99,7 +101,14 @@ class InterfaceDecl : public Decl
   public:
     InterfaceDecl(Identifier *name, List<Decl*> *members);
 
+    // XXX: Interfaces are not supported
+
     void BuildScope();
+    void PreEmit() { /* Empty */ }
+    Location* Emit(CodeGenerator *cg) { return NULL; }
+    int GetMemBytes() { return 0; }
+    int GetVTblBytes() { return 0; }
+    void AddLabelPrefix(const char *prefix) { /* Empty */ }
 };
 
 class FnDecl : public Decl
@@ -121,7 +130,9 @@ class FnDecl : public Decl
     bool HasReturnVal();
 
     void BuildScope();
+    void PreEmit() { /* Empty */ }
     Location* Emit(CodeGenerator *cg);
+    int GetMemBytes() { return 0; }
     int GetVTblBytes();
     void AddLabelPrefix(const char *prefix);
 
