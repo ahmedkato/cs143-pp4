@@ -8,6 +8,7 @@
 #include "ast_type.h"
 #include "ast_decl.h"
 #include "codegen.h"
+#include "errors.h"
 
 Decl* Expr::GetFieldDecl(Identifier *field, Expr *b) {
 
@@ -516,7 +517,6 @@ int ArrayAccess::GetMemBytesAddr() {
 Location* ArrayAccess::EmitRuntimeSubscriptCheck(CodeGenerator *cg,
                                                  Location *arr,
                                                  Location *sub) {
-    const char *err = "Decaf runtime error: Array subscript out of bounds\\n";
     Location *zro = cg->GenLoadConstant(0);
     Location *siz = cg->GenLoad(arr);
 
@@ -528,7 +528,7 @@ Location* ArrayAccess::EmitRuntimeSubscriptCheck(CodeGenerator *cg,
 
     const char *passCheck = cg->NewLabel();
     cg->GenIfZ(gratEqulSizLessZro, passCheck);
-    cg->GenBuiltInCall(PrintString, cg->GenLoadConstant(err));
+    cg->GenBuiltInCall(PrintString, cg->GenLoadConstant(err_arr_out_of_bounds));
     cg->GenBuiltInCall(Halt);
     cg->GenLabel(passCheck);
 
@@ -844,7 +844,6 @@ int NewArrayExpr::GetMemBytes() {
 }
 
 Location* NewArrayExpr::EmitRuntimeSizeCheck(CodeGenerator *cg, Location *siz) {
-    const char *err = "Decaf runtime error: Array size is <= 0\\n";
     Location *zro = cg->GenLoadConstant(0);
 
     Location *lessZro = cg->GenBinaryOp("<", siz, zro);
@@ -853,7 +852,7 @@ Location* NewArrayExpr::EmitRuntimeSizeCheck(CodeGenerator *cg, Location *siz) {
 
     const char *passCheck = cg->NewLabel();
     cg->GenIfZ(lessEqulZro, passCheck);
-    cg->GenBuiltInCall(PrintString, cg->GenLoadConstant(err));
+    cg->GenBuiltInCall(PrintString, cg->GenLoadConstant(err_arr_bad_size));
     cg->GenBuiltInCall(Halt);
     cg->GenLabel(passCheck);
 
