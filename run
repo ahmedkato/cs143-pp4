@@ -25,8 +25,6 @@ fi
 
 ./$COMPILER < $1 > tmp.asm 2>tmp.errors
 if [ $? -ne 0 -o -s tmp.errors ]; then
-  echo "Run script error: errors reported from $COMPILER compiling '$1'."
-  echo " "
   cat tmp.errors
   exit 1;
 fi
