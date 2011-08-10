@@ -695,7 +695,6 @@ Location* Call::EmitLabel(CodeGenerator *cg) {
     if (!IsMethodCall()) {
         ret = cg->GenLCall(field->GetName(), GetDecl()->HasReturnVal());
 
-        // TODO: Support variable Object sizes
         cg->GenPopParams(n * CodeGenerator::VarSize);
     } else {
         Location *b;
@@ -707,7 +706,6 @@ Location* Call::EmitLabel(CodeGenerator *cg) {
         cg->GenPushParam(b);
         ret = EmitDynamicDispatch(cg, b);
 
-        // TODO: Support variable Object sizes
         cg->GenPopParams((n+1) * CodeGenerator::VarSize);
     }
 

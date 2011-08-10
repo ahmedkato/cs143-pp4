@@ -19,7 +19,6 @@ VarDecl::VarDecl(Identifier *n, Type *t) : Decl(n) {
 }
 
 int VarDecl::GetMemBytes() {
-    // TODO: Update to handle object sizes
     return CodeGenerator::VarSize;
 }
 
@@ -127,10 +126,6 @@ int ClassDecl::GetVTblBytes() {
 }
 
 List<FnDecl*>* ClassDecl::GetMethodDecls() {
-    /* TODO: Implement polymorphic behaviour. Currently, the base class's
-     * method will be called even if the object is actually of a derived type.
-     */
-
     List<FnDecl*> *decls = new List<FnDecl*>;
 
     if (extends != NULL) {
