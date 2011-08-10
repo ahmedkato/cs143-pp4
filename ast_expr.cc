@@ -510,7 +510,7 @@ int ArrayAccess::GetMemBytesAddr() {
 Location* ArrayAccess::EmitRuntimeSubscriptCheck(CodeGenerator *cg,
                                                  Location *arr,
                                                  Location *sub) {
-    const char *err = "Decaf runtime error: Array subscript out of bounds\n";
+    const char *err = "Decaf runtime error: Array subscript out of bounds\\n";
     Location *zro = cg->GenLoadConstant(0);
     Location *siz = cg->GenLoad(arr);
 
@@ -823,6 +823,8 @@ Location* NewArrayExpr::Emit(CodeGenerator *cg) {
     Location *s = size->Emit(cg);
     Location *c = cg->GenLoadConstant(CodeGenerator::VarSize);
 
+    EmitRuntimeSizeCheck(cg, s);
+
     Location *n = cg->GenBinaryOp("*", s, c);
     Location *mem = cg->GenBuiltInCall(Alloc, cg->GenBinaryOp("+", c, n));
     cg->GenStore(mem, s);
@@ -831,8 +833,31 @@ Location* NewArrayExpr::Emit(CodeGenerator *cg) {
 }
 
 int NewArrayExpr::GetMemBytes() {
-    return size->GetMemBytes() + 4 * CodeGenerator::VarSize;
+    return size->GetMemBytes() + 4 * CodeGenerator::VarSize +
+           GetMemBytesRuntimeSizeCheck();
 }
+
+Location* NewArrayExpr::EmitRuntimeSizeCheck(CodeGenerator *cg, Location *siz) {
+    const char *err = "Decaf runtime error: Array size is <= 0\\n";
+    Location *zro = cg->GenLoadConstant(0);
+
+    Location *lessZro = cg->GenBinaryOp("<", siz, zro);
+    Location *equlZro = cg->GenBinaryOp("==", siz, zro);
+    Location *lessEqulZro = cg->GenBinaryOp("||", lessZro, equlZro);
+
+    const char *passCheck = cg->NewLabel();
+    cg->GenIfZ(lessEqulZro, passCheck);
+    cg->GenBuiltInCall(PrintString, cg->GenLoadConstant(err));
+    cg->GenBuiltInCall(Halt);
+    cg->GenLabel(passCheck);
+
+    return NULL;
+}
+
+int NewArrayExpr::GetMemBytesRuntimeSizeCheck() {
+    return 5 * CodeGenerator::VarSize;
+}
+
 
 Type* ReadIntegerExpr::GetType() {
     return Type::intType;

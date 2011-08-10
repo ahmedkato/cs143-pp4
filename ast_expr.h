@@ -364,6 +364,10 @@ class NewArrayExpr : public Expr
     Type* GetType();
     Location* Emit(CodeGenerator *cg);
     int GetMemBytes();
+
+  private:
+    Location* EmitRuntimeSizeCheck(CodeGenerator *cg, Location *siz);
+    int GetMemBytesRuntimeSizeCheck();
 };
 
 class ReadIntegerExpr : public Expr
