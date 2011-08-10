@@ -36,9 +36,8 @@ Decl* Expr::GetFieldDecl(Identifier *field, Node *n) {
 }
 
 Decl* Expr::GetFieldDecl(Identifier *field, Type *t) {
-    // If t != NamedType then this sets t = NULL
-    t = dynamic_cast<NamedType*>(t);
-
+    // It is assumed that t is *not* a primitive type. Results are undefined if
+    // this assumption is not met.
     while (t != NULL) {
         Decl *tDecl = Program::gScope->table->Lookup(t->GetName());
         Decl *d = tDecl->GetScope()->table->Lookup(field->GetName());
