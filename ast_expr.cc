@@ -693,7 +693,8 @@ Location* Call::EmitLabel(CodeGenerator *cg) {
 
     Location *ret;
     if (!IsMethodCall()) {
-        ret = cg->GenLCall(field->GetName(), GetDecl()->HasReturnVal());
+        FnDecl *d = GetDecl();
+        ret = cg->GenLCall(d->GetLabel(), d->HasReturnVal());
 
         cg->GenPopParams(n * CodeGenerator::VarSize);
     } else {

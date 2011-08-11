@@ -179,6 +179,8 @@ FnDecl::FnDecl(Identifier *n, Type *r, List<VarDecl*> *d) : Decl(n) {
     (formals=d)->SetParentAll(this);
     body = NULL;
     label = new std::string(GetName());
+    if (*label != "main")
+        label->insert(0, "____"); // Prefix function labels to avoid conflicts
     isMethod = false;
 }
 
