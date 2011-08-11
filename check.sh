@@ -23,7 +23,7 @@ for file in $LIST; do
 		ext='decaf'
 	else
 		echo "Error: Input file for base: $base not found"
-		exit 1
+		continue
 	fi
 
 	tmp=${TMP:-"/tmp"}/check.tmp
